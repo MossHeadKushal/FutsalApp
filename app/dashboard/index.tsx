@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, PanResponder, Animated, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, PanResponder, Animated, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const Index = () => {
+  const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
   const sidebarAnim = useRef(new Animated.Value(-SCREEN_WIDTH * 0.6)).current;
@@ -18,12 +19,19 @@ const Index = () => {
     }).start();
     setIsSidebarOpen(!isSidebarOpen);
   };
+const handleLogout = () => {
+  setLoading(true);
 
-  const handleLogout = () => {
+  setTimeout(() => {
     setIsSidebarOpen(false);
+    setLoading(false);
     router.back();
-    alert('Logged out!');
-  };
+    alert("Logged out!");
+  }, 2000);
+};
+
+
+  
 
   const panResponder = useRef(
     PanResponder.create({
@@ -80,8 +88,14 @@ const Index = () => {
 
         <Text className="p-4 font-semibold text-xl">Admin Dashboard</Text>
 
-        <TouchableOpacity onPress={handleLogout} className="p-2 bg-gray-500 rounded-xl">
-          <Text className="text-white">Logout</Text>
+        <TouchableOpacity onPress={handleLogout}
+        disabled={loading} className="p-2 bg-gray-500 rounded-xl">
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ):(
+               <Text className="text-white">
+                Logout</Text>
+            )}      
         </TouchableOpacity>
       </View>
     </View>
