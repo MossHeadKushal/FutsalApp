@@ -1,0 +1,72 @@
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+export default function FutsalManagersScreen() {
+  const data: any[] = [];
+
+  return (
+    // 🔹 Full screen container
+    <View className="flex-1 bg-gray-300 px-4 py-6">
+      
+      {/* 🔹 Content wrapper (full width) */}
+      <View className="w-full">
+        
+        {/* Header */}
+        <View className="flex justify-between items-center mb-6">
+          <Text className="text-black text-3xl font-bold">
+            Futsal Managers
+          </Text>
+
+</View>
+<View className="flex-row justify-end mb-4">
+          <TouchableOpacity className="bg-green-500 px-4 py-2 rounded-lg">
+            <Text className="text-black font-semibold">
+              New Futsal Manager
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Card */}
+        <View className="bg-gray-300 rounded-xl border border-white/5 overflow-hidden">
+          
+          {/* 🔹 Search (FULL WIDTH) */}
+          <View className="p-4 border-b border-white/5">
+            <View className="flex-row items-center bg-white rounded-lg px-3 py-3 w-full">
+              <Ionicons name="search-outline" size={18} color="#9ca3af" />
+              <TextInput
+                placeholder="Search"
+                placeholderTextColor="#9ca3af"
+                className="ml-2 text-black flex-1 w-full"
+              />
+            </View>
+          </View>
+
+          {/* Table Header */}
+          <View className="flex-row px-3 py-3 bg-[#1B1B20] border-b border-white/5 w-full rounded-lg">
+            <Text className="flex-1 text-gray-300 font-semibold">Name</Text>
+            <Text className="flex-1 text-gray-300 font-semibold">Email</Text>
+            <Text className="flex-1 text-gray-300 font-semibold">Phone</Text>
+            <Text className="flex-1 text-gray-300 font-semibold">Futsal</Text>
+          </View>
+
+          {/* Empty State */}
+          <View className="h-64 justify-center items-center">
+            <View className="bg-[#1F1F25] p-4 rounded-full mb-4">
+              <Ionicons name="close" size={24} color="#9ca3af" />
+            </View>
+            <Text className="text-black-300 text-lg">
+              No Futsal Managers
+            </Text>
+          </View>
+        </View>
+
+      </View>
+    </View>
+  );
+}

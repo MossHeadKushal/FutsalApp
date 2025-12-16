@@ -1,126 +1,152 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  Image, 
-  KeyboardAvoidingView, 
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  ActivityIndicator
-} from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import './global.css';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { JSX, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import futsalImage from '../assets/images/futsal.jpg';
+import { useAuth } from './authContext';
+import './global.css';
 
-export default function Login() {
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+const STORAGE_KEY = 'REMEMBER_ME_CREDENTIALS';
+
+export default function Login(): JSX.Element {
+  const { login } = useAuth();
   const router = useRouter();
 
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(!isPasswordVisible);
-  };
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   const dummyUser = {
     email: 'user@example.com',
     password: 'password123',
   };
 
-  const handleLogin = () => {
+  // 🔹 Load saved credentials
+  useEffect(() => {
+    const loadCredentials = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setEmail(parsed.email);
+          setPassword(parsed.password);
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.log('Failed to load credentials');
+      }
+    };
+
+    loadCredentials();
+  }, []);
+
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Alert.alert('Error', 'Please enter email and password');
       return;
     }
 
     setLoading(true);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
-      return;
-    }
+    setTimeout(async () => {
+      if (email === dummyUser.email && password === dummyUser.password) {
+        // 🔹 Save or clear credentials
+        if (rememberMe) {
+          await AsyncStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ email, password })
+          );
+        } else {
+          await AsyncStorage.removeItem(STORAGE_KEY);
+        }
 
-    setTimeout(() => {
-
-    if (email === dummyUser.email && password === dummyUser.password) {
-      Alert.alert('Success', 'Login successful!');
-      router.push('/dashboard');
-    } else {
-      Alert.alert('Error', 'Invalid email or password');
-    }
-    setLoading(false);
-  },2000);
-};
+        login();
+        router.replace('/dashboard');
+      } else {
+        Alert.alert('Error', 'Invalid credentials');
+      }
+      setLoading(false);
+    }, 2000);
+  };
 
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white"
-      behavior={Platform.OS === "android" ? "padding" : "height"}
+      behavior={Platform.OS === 'android' ? 'padding' : undefined}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="flex-1 justify-center items-center px-6">
+          <Image source={futsalImage} className="w-32 h-32 mb-6" />
 
-          <View className="justify-center items-center mt-4">
-            <Image
-              source={futsalImage}
-              className="w-32 h-32"
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text className="text-3xl font-bold mb-8 text-center text-black">
-            Futsal Login
-          </Text>
+          <Text className="text-3xl font-bold mb-8">Futsal Login</Text>
 
           <TextInput
             className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4"
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          <View className="w-full relative mb-6">
+          <View className="w-full relative mb-4">
             <TextInput
               className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12"
               placeholder="Password"
+              secureTextEntry={!isPasswordVisible}
               value={password}
               onChangeText={setPassword}
-              secureTextEntry={!isPasswordVisible}
             />
             <TouchableOpacity
-              onPress={togglePasswordVisibility}
               className="absolute right-3 top-3"
+              onPress={() => setIsPasswordVisible(!isPasswordVisible)}
             >
               <Ionicons
                 name={isPasswordVisible ? 'eye-off' : 'eye'}
-                size={24}
+                size={22}
                 color="gray"
               />
             </TouchableOpacity>
           </View>
 
-         <TouchableOpacity 
-  className="w-full bg-gray-500 rounded-lg py-3 items-center"
-  onPress={handleLogin}
-  disabled={loading}
->
-  {loading ? (
-    <ActivityIndicator size="small" color="#fff" />
-  ) : (
-    <Text className="text-white font-semibold text-lg">Login</Text>
-  )}
-</TouchableOpacity>
+          {/* 🔹 Remember Me */}
+          <TouchableOpacity
+            className="flex-row items-center self-start mb-6"
+            onPress={() => setRememberMe(!rememberMe)}
+          >
+            <Ionicons
+              name={rememberMe ? 'checkbox' : 'square-outline'}
+              size={22}
+              color="gray"
+            />
+            <Text className="ml-2 text-gray-700">Remember Me</Text>
+          </TouchableOpacity>
 
-
+          <TouchableOpacity
+            className="w-full bg-gray-500 py-3 rounded-lg items-center"
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-white text-lg font-semibold">Login</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
