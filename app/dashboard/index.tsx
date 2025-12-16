@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Text,
@@ -9,21 +8,10 @@ import { useAuth } from '../authContext';
 
 export default function Index() {
   const [loading, setLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const router = useRouter();
    const { logout } = useAuth();
 
  
  
-const handleLogout = () => {
-  setLoading(true);
-
-  setTimeout(() => {
-    logout(); 
-    setLoading(false);
-    router.replace('/');
-  }, 1500);
-};
 
 
  

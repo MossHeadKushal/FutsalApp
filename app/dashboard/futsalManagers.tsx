@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   Text,
@@ -9,6 +10,7 @@ import {
 
 export default function FutsalManagersScreen() {
   const data: any[] = [];
+  const router = useRouter();
 
   return (
     // 🔹 Full screen container
@@ -25,7 +27,11 @@ export default function FutsalManagersScreen() {
 
 </View>
 <View className="flex-row justify-end mb-4">
-          <TouchableOpacity className="bg-green-500 px-4 py-2 rounded-lg">
+          <TouchableOpacity 
+          onPress={() => {
+            router.push('/dashboard/futsalManagerForm');
+          }}
+          className="bg-green-500 px-4 py-2 rounded-lg">
             <Text className="text-black font-semibold">
               New Futsal Manager
             </Text>
