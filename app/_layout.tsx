@@ -79,7 +79,7 @@ function AppLayout() {
           />
 
           {/* Header / Menu Button */}
-          <View className="p-4 mt-4">
+          <View className="p-4 mt-4 bg-color bg-green-600">
             <TouchableOpacity
               onPress={isOpen ? closeSidebar : openSidebar}
               className="p-2 bg-gray-500 rounded-xl w-12"
@@ -112,6 +112,12 @@ function AppLayout() {
         <Stack.Screen name="dashboard/futsals" />
         <Stack.Screen name="dashboard/futsalManagers" />
         <Stack.Screen name="dashboard/futsalManagerForm" />
+        <Stack.Screen name="dashboard/futsalsForm" />
+        <Stack.Screen name="edit/edit" />
+        <Stack.Screen name="edit/calender" />
+        <Stack.Screen name="edit/courts" />
+        <Stack.Screen name="edit/regularBookings" />
+        <Stack.Screen name="edit/settings" />
       </Stack>
     </View>
   );

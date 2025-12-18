@@ -122,7 +122,7 @@ export default function Sidebar({
         <TouchableOpacity
           onPress={onLogout}
           disabled={loading}
-          className="mt-auto flex-row items-center py-3 px-3 rounded-lg bg-gray-300"
+          className="mt-auto flex-row items-center mb-8 py-3 px-3 rounded-lg bg-gray-300"
         >
           {loading ? (
             <ActivityIndicator size="small" color="#fff" />

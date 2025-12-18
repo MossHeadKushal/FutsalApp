@@ -14,14 +14,14 @@ export default function FutsalManagersScreen() {
 
   return (
     // 🔹 Full screen container
-    <View className="flex-1 bg-gray-300 px-4 py-6">
+    <View className="flex-1 bg-neutral-800 px-4 py-6">
       
       {/* 🔹 Content wrapper (full width) */}
       <View className="w-full">
         
         {/* Header */}
         <View className="flex justify-between items-center mb-6">
-          <Text className="text-black text-3xl font-bold">
+          <Text className="text-white text-3xl font-bold">
             Futsal Managers
           </Text>
 
@@ -32,14 +32,14 @@ export default function FutsalManagersScreen() {
             router.push('/dashboard/futsalManagerForm');
           }}
           className="bg-green-500 px-4 py-2 rounded-lg">
-            <Text className="text-black font-semibold">
+            <Text className="text-blac font-semibold">
               New Futsal Manager
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Card */}
-        <View className="bg-gray-300 rounded-xl border border-white/5 overflow-hidden">
+        <View className="bg-neutral-800 rounded-xl border border-white/5 overflow-hidden">
           
           {/* 🔹 Search (FULL WIDTH) */}
           <View className="p-4 border-b border-white/5">
@@ -63,10 +63,10 @@ export default function FutsalManagersScreen() {
 
           {/* Empty State */}
           <View className="h-64 justify-center items-center">
-            <View className="bg-[#1F1F25] p-4 rounded-full mb-4">
-              <Ionicons name="close" size={24} color="#9ca3af" />
+            <View className="bg-[#1F1F25] p-4 rounded-full mb-4 ">
+              <Ionicons name="close" size={24} color="white" />
             </View>
-            <Text className="text-black-300 text-lg">
+            <Text className="text-white text-lg">
               No Futsal Managers
             </Text>
           </View>
