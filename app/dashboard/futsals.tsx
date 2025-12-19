@@ -40,10 +40,9 @@ export default function Futsals() {
           <Text className="flex-1 text-gray-300">{item.address}</Text>
           <Text className="flex-1 text-gray-300">{item.courts}</Text>
 
-          {/* Ellipsis button */}
           <TouchableOpacity
             onPress={(e) => {
-              e.stopPropagation(); // prevent outer Pressable from triggering
+              e.stopPropagation(); 
               setOpenDropdownId(isDropdownVisible ? null : item.id);
             }}
             className="px-2 py-1 rounded-lg ml-2 z-10"
@@ -55,7 +54,7 @@ export default function Futsals() {
         {/* Floating dropdown menu */}
         {isDropdownVisible && (
           <Pressable
-            onPress={(e) => e.stopPropagation()} // don't close when tapping inside dropdown
+            onPress={(e) => e.stopPropagation()} 
             className="absolute top-10 right-0 w-42 bg-gray-700 rounded-lg shadow-lg z-20"
           >
             <TouchableOpacity
@@ -116,10 +115,12 @@ export default function Futsals() {
   return (
     <Pressable
       className="flex-1 bg-neutral-800 px-4 py-6"
-      onPress={() => setOpenDropdownId(null)} // close dropdown when tapping outside
+      onPress={() => setOpenDropdownId(null)} 
     >
       {/* Header */}
+      <View className='w-full'>
       <View className="flex-row justify-between items-center mb-6">
+        
         <Text className="text-white text-3xl font-bold">Futsals</Text>
 
         <TouchableOpacity
@@ -128,6 +129,7 @@ export default function Futsals() {
         >
           <Text className="text-black font-semibold">New Futsals</Text>
         </TouchableOpacity>
+      </View>
       </View>
 
       {/* Search */}

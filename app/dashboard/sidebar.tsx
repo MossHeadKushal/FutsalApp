@@ -30,7 +30,7 @@ export default function Sidebar({
   const router = useRouter();
   const sidebarAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
 
-  /* ------------- Animate open/close ------------- */
+  // Animate open/close 
   useEffect(() => {
     Animated.spring(sidebarAnim, {
       toValue: isOpen ? 0 : -SIDEBAR_WIDTH,
@@ -38,7 +38,7 @@ export default function Sidebar({
     }).start();
   }, [isOpen]);
 
-  /* ------------- PanResponder for swipe ------------- */
+  // PanResponder for swipe
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 5,
@@ -53,9 +53,8 @@ export default function Sidebar({
 
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx < -SIDEBAR_WIDTH / 3) {
-          onClose(); // Swipe left enough → close
+          onClose(); 
         } else {
-          // Snap back to open
           Animated.spring(sidebarAnim, {
             toValue: 0,
             useNativeDriver: true,
@@ -144,4 +143,4 @@ export default function Sidebar({
       )}
     </>
   );
-}
+} 

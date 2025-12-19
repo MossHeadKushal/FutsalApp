@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import {
-    Alert,
-    StatusBar,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  StatusBar,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 // Define the component props (none needed for this simple form, but good practice)
@@ -44,7 +44,7 @@ const FutsalManagerForm: React.FC<FutsalManagerFormProps> = () => {
   const [name, setName] = useState<string>('');
   const [slug, setSlug] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [courts, setCourts] = useState<string>(''); // Placeholder state
+  const [courts, setCourts] = useState<string>(''); 
   const [active, setActive] = useState<boolean>(true);
 
   const handleCreate = (andAnother: boolean = false) => {
@@ -73,7 +73,6 @@ const FutsalManagerForm: React.FC<FutsalManagerFormProps> = () => {
           Create Futsal Manager
         </Text>
 
-        {/* --- Form Fields --- */}
         {/* --- Form Fields --- */}
 <View className="mx-[-10] mb-5 space-y-4">
 

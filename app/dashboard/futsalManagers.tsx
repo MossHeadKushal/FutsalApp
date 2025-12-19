@@ -13,10 +13,8 @@ export default function FutsalManagersScreen() {
   const router = useRouter();
 
   return (
-    // 🔹 Full screen container
     <View className="flex-1 bg-neutral-800 px-4 py-6">
       
-      {/* 🔹 Content wrapper (full width) */}
       <View className="w-full">
         
         {/* Header */}
@@ -41,7 +39,7 @@ export default function FutsalManagersScreen() {
         {/* Card */}
         <View className="bg-neutral-800 rounded-xl border border-white/5 overflow-hidden">
           
-          {/* 🔹 Search (FULL WIDTH) */}
+          {/* Search Bar */}
           <View className="p-4 border-b border-white/5">
             <View className="flex-row items-center bg-white rounded-lg px-3 py-3 w-full">
               <Ionicons name="search-outline" size={18} color="#9ca3af" />
