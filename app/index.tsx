@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import futsalImage from '../assets/images/futsal.jpg';
+import { assets } from '../assets/images/assets';
 import { useAuth } from './authContext';
 import './global.css';
 
@@ -76,6 +76,7 @@ export default function Login(): JSX.Element {
         }
 
         login();
+        // Navigate to the dashboard — initialRouteName on Tabs will show its index
         router.replace('/dashboard');
       } else {
         Alert.alert('Error', 'Invalid credentials');
@@ -91,7 +92,7 @@ export default function Login(): JSX.Element {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View className="flex-1 justify-center items-center px-6">
-          <Image source={futsalImage} className="w-32 h-32 mb-6" />
+          <Image source={assets.futsal} className="w-32 h-32 mb-6" />
 
           <Text className="text-3xl font-bold mb-8">Futsal Login</Text>
 

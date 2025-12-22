@@ -1,14 +1,14 @@
 // FutsalManagerForm.tsx
 
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    SafeAreaView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 // Define the component props (none needed for this simple form, but good practice)
@@ -23,19 +23,13 @@ interface FutsalPickerProps {
 // --- Simulated Dropdown Component (NativeWind styled) ---
 const FutsalPicker: React.FC<FutsalPickerProps> = ({ selectedValue }) => (
   <TouchableOpacity
-    className="bg-neutral-800 rounded-lg h-12 px-4 flex-row items-center justify-between border border-neutral-800"
+    className="bg-secondary rounded-lg h-10 px-3 flex-row items-center justify-between"
     onPress={() => Alert.alert('Simulating Picker', 'A dropdown or modal would open here')}
   >
-    <Text
-      className={
-        selectedValue
-          ? 'text-base text-gray-200'
-          : 'text-base text-gray-500'
-      }
-    >
+    <Text className={selectedValue ? 'text-black text-[12px]' : 'text-black/60 text-[12px]'}>
       {selectedValue || 'Select an option'}
     </Text>
-    <Text className="text-gray-500 text-sm">V</Text>
+    <Text className="text-black/60 text-[12px]">V</Text>
   </TouchableOpacity>
 );
 
@@ -45,6 +39,7 @@ const FutsalManagerForm: React.FC<FutsalManagerFormProps> = () => {
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [futsal, setFutsal] = useState<string>(''); // Placeholder state
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleCreate = (andAnother: boolean = false) => {
     Alert.alert(
@@ -55,100 +50,107 @@ const FutsalManagerForm: React.FC<FutsalManagerFormProps> = () => {
   };
 
   const handleCancel = () => {
+    // show a loading spinner while cancelling
+    setLoading(true);
     setName('');
     setEmail('');
     setPhone('');
     setFutsal('');
-    Alert.alert('Action', 'Form cancelled and cleared.');
+    setTimeout(() => {
+      // navigate back after a short delay
+      setLoading(false);
+      router.back();
+    }, 1000);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
-
+    <View className="gap-30 flex-1 bg-white">
       <View className="p-5 flex-1">
         {/* Title */}
-        <Text className="text-2xl font-bold text-white mb-8">
-          Create Futsals
-        </Text>
+        <Text className="justify-center text-center text-2xl font-semibold text-black mb-8">Create Futsal Manager</Text>
 
         {/* --- Form Fields --- */}
-        <View className="flex-row mx-[-10] mb-5">
+        <View className="mx-[-10] mb-5 space-y-4">
+
           {/* Name */}
-          <View className="flex-1 mx-2">
-            <Text className="text-sm text-gray-200 mb-1">Name</Text>
+          <View className="mx-2">
+            <Text className="text-sm text-black ml-4 p-1 font-semibold">Name</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white text-base"
+              className="bg-secondary border-hairline rounded-full h-12 px-4 text-black"
               onChangeText={setName}
               value={name}
-              placeholder=" "
-              placeholderTextColor="#A0A0A0" // Neutral-500 equivalent
+              placeholder="Enter full name"
+              placeholderTextColor="black"
             />
           </View>
 
           {/* Email */}
-          <View className="flex-1 mx-2">
-            <Text className="text-sm text-gray-200 mb-1">Email*</Text>
+          <View className="mx-2">
+            <Text className="text-sm text-black font-semibold mt-1 ml-4 p-1">Email*</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white text-base"
+              className="bg-secondary border-hairline rounded-full h-12 px-4 text-black"
               onChangeText={setEmail}
               value={email}
               keyboardType="email-address"
-              placeholder=" "
-              placeholderTextColor="#A0A0A0"
+              placeholder="Enter email"
+              placeholderTextColor="black"
             />
           </View>
-        </View>
 
-        <View className="flex-row mx-[-10] mb-5">
           {/* Phone */}
-          <View className="flex-1 mx-2">
-            <Text className="text-sm text-gray-200 mb-1">Phone*</Text>
+          <View className="mx-2">
+            <Text className="text-sm text-black font-semibold mt-1 ml-4 p-1">Phone*</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white text-base"
+              className="bg-secondary border-hairline rounded-full h-12 px-4 text-black"
               onChangeText={setPhone}
               value={phone}
               keyboardType="phone-pad"
-              placeholder=" "
-              placeholderTextColor="#A0A0A0"
+              placeholder="Enter phone"
+              placeholderTextColor="black"
               maxLength={15}
             />
           </View>
 
-          {/* Futsal (Dropdown) */}
-          <View className="flex-1 mx-2">
-            <Text className="text-sm text-gray-200 mb-1">Futsal*</Text>
+          {/* Futsal */}
+          <View className="mx-2">
+            <Text className="text-sm text-black font-semibold mt-1 ml-4 p-1">Futsal*</Text>
             <FutsalPicker selectedValue={futsal} onSelect={setFutsal} />
           </View>
+
         </View>
 
         {/* --- Action Buttons --- */}
         <View className="flex-row mt-3 items-center">
           <TouchableOpacity
-            className="bg-green-600 rounded-lg py-3 px-5 mr-3"
+            className={`bg-primary rounded-lg py-3 px-5 mr-3 ${loading ? 'opacity-50' : ''}`}
             onPress={() => handleCreate(false)}
+            disabled={loading}
           >
-            <Text className="text-white text-base font-semibold">Create</Text>
+            <Text className="text-black text-base font-semibold">Create</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-neutral-800 rounded-lg py-3 px-5 mr-3 border border-gray-400"
+            className={`bg-secondary rounded-lg py-3 px-5 mr-3 border border-gray-400 ${loading ? 'opacity-50' : ''}`}
             onPress={() => handleCreate(true)}
+            disabled={loading}
           >
-            <Text className="text-white text-base font-semibold">
-              Create & create another
-            </Text>
+            <Text className="text-black text-base font-semibold">Create & create another</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="rounded-lg py-3 px-5"
+            className={`rounded-lg py-3 border border-gray-400 px-5 ${loading ? 'opacity-50' : ''}`}
             onPress={handleCancel}
+            disabled={loading}
           >
-            <Text className="text-gray-500 text-base">Cancel</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#ef4444" />
+            ) : (
+              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,132 +1,154 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, PanResponder, TouchableOpacity, View } from 'react-native';
-import { AuthProvider, useAuth } from './authContext';
-import Sidebar from './dashboard/sidebar';
+import { Stack, usePathname, useRouter } from 'expo-router';
+import React, { ComponentProps, useState } from 'react';
+import {
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { AuthProvider } from './authContext';
+import './global.css';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.6;
+type IconName = ComponentProps<typeof Ionicons>['name'];
 
-function AppLayout() {
-  const { isLoggedIn, logout } = useAuth();
-  const router = useRouter();
-
-  const sidebarAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
-  const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const openSidebar = () => {
-    Animated.timing(sidebarAnim, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-    setIsOpen(true);
-  };
-
-  const closeSidebar = () => {
-    Animated.timing(sidebarAnim, {
-      toValue: -SIDEBAR_WIDTH,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-    setIsOpen(false);
-  };
-
-  const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      closeSidebar();
-      logout();
-      setLoading(false);
-      router.replace('/');
-    }, 1500);
-  };
-
-  // ---------- Edge swipe PanResponder ----------
-  const edgePanResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (_, gesture) => gesture.dx > 0,
-      onMoveShouldSetPanResponder: (_, gesture) => gesture.dx > 5,
-      onPanResponderMove: (_, gesture) => {
-        if (gesture.dx > 0 && !isOpen) {
-          const newVal = Math.min(gesture.dx - SIDEBAR_WIDTH, 0); // move sidebar
-          sidebarAnim.setValue(newVal);
-        }
-      },
-      onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 50 && !isOpen) {
-          openSidebar();
-        } else if (!isOpen) {
-          sidebarAnim.setValue(-SIDEBAR_WIDTH);
-        }
-      },
-    })
-  ).current;
-
-  return (
-    <View className="flex-1 bg-white">
-      {isLoggedIn && (
-        <>
-          {/* Sidebar */}
-          <Sidebar
-            sidebarAnim={sidebarAnim}
-            isOpen={isOpen}
-            onClose={closeSidebar}
-            onLogout={handleLogout}
-            loading={loading}
-          />
-
-          {/* Header / Menu Button */}
-          <View className="p-4 bg-color bg-green-600">
-            <TouchableOpacity
-              onPress={isOpen ? closeSidebar : openSidebar}
-              className="p-2 bg-gray-500 rounded-xl w-12"
-            >
-              <Ionicons name="menu-outline" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Edge Swipe Zone */}
-          {!isOpen && (
-            <View
-              {...edgePanResponder.panHandlers}
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                height: '100%',
-                width: 20, // edge swipe width
-                zIndex: 30,
-              }}
-            />
-          )}
-        </>
-      )}
-
-      {/* Stack navigator for screens */}
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="dashboard/index" />
-        <Stack.Screen name="dashboard/futsals" />
-        <Stack.Screen name="dashboard/futsalManagers" />
-        <Stack.Screen name="dashboard/futsalManagerForm" />
-        <Stack.Screen name="dashboard/futsalsForm" />
-        <Stack.Screen name="edit/edit" />
-        <Stack.Screen name="edit/calender" />
-        <Stack.Screen name="edit/courts" />
-        <Stack.Screen name="edit/regularBookings" />
-        <Stack.Screen name="edit/setting" />
-      </Stack>
-    </View>
-  );
-}
+const NAV_ITEMS: { label: string; icon: IconName; route: string }[] = [
+  { label: 'Home', icon: 'home-outline', route: '/dashboard' },
+  { label: 'Managers', icon: 'person-outline', route: '/dashboard/futsalManagers' },
+  { label: 'Futsals', icon: 'football-outline', route: '/dashboard/futsals' },
+];
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AppLayout />
+      <MainContent />
     </AuthProvider>
   );
-} 
+}
+
+function MainContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const isLoginPage = pathname === '/';
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      setIsLoggingOut(false);
+      router.replace('/');
+    }, 500);
+  };
+
+  return (
+    <View className="flex-1 bg-[#171717]">
+      {/* 1. TOP HEADER AREA (Light Green) */}
+      {!isLoginPage && (
+        <>
+          <StatusBar barStyle="dark-content" backgroundColor="#B7F000" />
+          <View 
+            style={{ height: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight }} 
+            className="bg-[#00c187] w-full" 
+          />
+        </>
+      )}
+
+      {/* 2. THE SCREEN CONTENT */}
+      <View className="flex-1">
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="dashboard" />
+          <Stack.Screen name="edit" />
+        </Stack>
+      </View>
+
+      {/* 3. Global Navigation Menu */}
+      {!isLoginPage && (
+        <View 
+          style={[
+            styles.floatingBar,
+            { bottom: Platform.OS === 'android' ? 40 : 30 }
+          ]}
+        >
+          {NAV_ITEMS.map((item) => {
+            // FIX: Use exact matching for Home to prevent "double active" state
+            // and startsWith for others to allow sub-page highlighting.
+            const isActive = item.route === '/dashboard' 
+              ? pathname === '/dashboard' || pathname === '/dashboard/'
+              : pathname.startsWith(item.route);
+
+            return (
+              <TouchableOpacity
+                key={item.route}
+                onPress={() => router.push(item.route as any)}
+                activeOpacity={0.7}
+                className="flex-1 items-center justify-center relative"
+              >
+                {/* {isActive && (
+                    <View className="absolute w-10 h-auto bg-[#ffffff] rounded-full" />
+                )} */}
+
+                <View className={`items-center justify-center w-12 h-12  ${isActive ? 'bg-[#00c187] rounded-full': ''}`}>
+                  <Ionicons 
+                    name={item.icon} 
+                    size={22} 
+                    color={isActive ? '#ffffff' : '#6b7280'} 
+                  />
+                </View>
+
+                {/* Disable text when NOT active */}
+                
+                  <Text className="text-[10px] mt-1 text-[#0f0D23] font-bold rounded-full">
+                    {item.label}
+                  </Text>
+                
+              </TouchableOpacity>
+            );
+          })}
+
+          {/* Logout Button */}
+          <TouchableOpacity
+            onPress={handleLogout}
+            activeOpacity={0.7}
+            className="flex-1 items-center justify-center"
+          >
+            <View className="items-center justify-center w-12 h-12">
+              {isLoggingOut ? (
+                <ActivityIndicator size="small" color="#ef4444" />
+              ) : (
+                <Ionicons name="log-out-outline" size={22} color="#ef4444" />
+              )}
+            </View>
+            {/* Always show logout text or disable it? (Following your pattern) */}
+            <Text className="text-[10px] text-red-600 font-medium mt-1">Logout</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  floatingBar: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    height: 75,
+    backgroundColor: '#ffffff',
+    borderRadius: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 10,
+    zIndex: 999, 
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  }
+});

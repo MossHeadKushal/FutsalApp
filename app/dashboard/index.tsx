@@ -1,23 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Text,
   View
 } from 'react-native';
-import { useAuth } from '../authContext';
 
 
-export default function Index() {
-  const [loading, setLoading] = useState(false);
-   const { logout } = useAuth();
-
- 
- 
-
-
+export default function Index() { 
  
   return (
-    <View className="flex-1 bg-white p-4 justify-center items-center ">
-        <Text className="text-xl font-semibold ">
+    <View className="flex-1 bg-white p-4 justify-center items-center pb-24">
+        <Text className="text-xl font-semibold">
           Admin Dashboard
         </Text>
 
