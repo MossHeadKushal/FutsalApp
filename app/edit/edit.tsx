@@ -1,31 +1,57 @@
 import { useRouter } from 'expo-router';
 import React, { useState, } from 'react';
-import { StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Edit() {
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [address, setAddress] = useState('');
-  const [active, setActive] = useState(true);
+  const [name, setName] = useState<string>('');
+  const [slug, setSlug] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
+  const [active, setActive] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  return (
-    <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
 
+  const handleCreate = (andAnother: boolean = false) => {
+     setLoading(true);
+    // Simulate form submission
+    alert(`Action: ${andAnother ? 'Create & Create Another' : 'Create'}\nName: ${name}\nSlug: ${slug}\nAddress: ${address}`);
+    // Add logic for API call here
+    setTimeout(() => {
+          // navigate back after a short delay
+          setLoading(false);
+          router.back();
+        }, 1000);
+  }
+
+
+  const handleCancel = () => {
+      setLoading(true);
+      setName('');
+      setSlug('');
+      setAddress('');
+      
+        setTimeout(() => {
+          // navigate back after a short delay
+          setLoading(false);
+          router.back();
+        }, 1000);
+    };
+
+  return (
+    <View className="flex-1 bg-white">
       <View className="p-5 flex-1">
         {/* Title */}
-        <Text className="text-2xl font-bold text-white mb-8">
+        <Text className="text-2xl font-bold text-black mb-8">
           Edit Futsal
         </Text>
 
         {/* Form */}
-        <View className="space-y-4">
+        <View className="">
           {/* Name */}
           <View>
-            <Text className="text-sm text-gray-200 mb-1">Name</Text>
+            <Text className="text-sm font-semibold text-black mb-1">Name</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white"
+              className="bg-secondary rounded-lg h-12 px-4 text-white"
               value={name}
               onChangeText={setName}
               placeholder="Enter full name"
@@ -35,9 +61,9 @@ export default function Edit() {
 
           {/* Slug */}
           <View>
-            <Text className="text-sm text-gray-200 mb-1">Slug *</Text>
+            <Text className="text-sm font-semibold text-black mt-1 mb-1">Slug *</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white"
+              className="bg-secondary rounded-lg h-12 px-4 text-white"
               value={slug}
               onChangeText={setSlug}
               placeholder="Enter unique slug"
@@ -47,9 +73,9 @@ export default function Edit() {
 
           {/* Address */}
           <View>
-            <Text className="text-sm text-gray-200 mb-1">Address *</Text>
+            <Text className="text-sm font-semibold text-black mt-1 mb-1">Address *</Text>
             <TextInput
-              className="bg-neutral-800 rounded-lg h-12 px-4 text-white"
+              className="bg-secondary rounded-lg h-12 px-4 text-white"
               value={address}
               onChangeText={setAddress}
               placeholder="Enter your address"
@@ -58,38 +84,42 @@ export default function Edit() {
           </View>
 
           {/* Active Switch */}
-          <View className="flex-row items-center justify-between mt-4">
-            <Text className="text-base text-gray-200">
+          <View className="flex-row items-center justify-end mt-4">
+            <Text className="text-base text-black font-semibold">
               {active ? 'Active' : 'Inactive'}
             </Text>
 
             <Switch
               value={active}
               onValueChange={setActive}
-              trackColor={{ false: '#525252', true: '#22c55e' }}
-              thumbColor={active ? '#16a34a' : '#f9fafb'}
+              trackColor={{ false: '#525252', true: '#00c187' }}
+              thumbColor={active ? '#00c187' : '#f9fafb'}
             />
           </View>
-          <View className="flex-row mb-5 mt-6 items-center">
-              <TouchableOpacity
-               onPress={() => {
-                router.push({ pathname: '/dashboard/futsals'})
-              }}
-                className="bg-green-600 rounded-lg py-3 px-5 mr-3"
-              >
-                <Text className="text-white text-base font-semibold">Save Changes</Text>
-              </TouchableOpacity>
-      
-              <TouchableOpacity
-              onPress={() => {
-                router.push({ pathname: '/dashboard/futsals'})
-              }}
-                className="rounded-lg py-3 px-5"
-              >
-                <Text className="text-gray-500 text-base">Cancel</Text>
-              </TouchableOpacity>
-            </View>
-        </View>
+          {/* --- Action Buttons --- */}
+                        <View className="flex-row mt-3 items-center">
+                          <TouchableOpacity
+                            className={`bg-primary rounded-lg py-3 px-5 mr-3 ${loading ? 'opacity-50' : ''}`}
+                            onPress={() => handleCreate(false)}
+                            disabled={loading}
+                          >
+                            <Text className="text-black text-base font-semibold">Create</Text>
+                          </TouchableOpacity>
+                
+                    
+                          <TouchableOpacity
+                            className={`rounded-lg py-3 border border-gray-400 px-5 ${loading ? 'opacity-50' : ''}`}
+                            onPress={handleCancel}
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <ActivityIndicator size="small" color="#ef4444" />
+                            ) : (
+                              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+                            )}
+                          </TouchableOpacity>
+                        </View>
+              </View>
       </View>
             
     </View>

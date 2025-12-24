@@ -1,10 +1,11 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// length 17 covers 6 AM to 10 PM
 const TIMES = Array.from({ length: 17 }, (_, i) => {
   const hour = i + 6; 
   const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -14,6 +15,7 @@ const TIMES = Array.from({ length: 17 }, (_, i) => {
 
 export default function CalenderScreen() {
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const [bookedSlots, setBookedSlots] = useState<boolean[][]>(
     Array(TIMES.length).fill(null).map(() => Array(DAYS.length).fill(false))
@@ -24,14 +26,21 @@ export default function CalenderScreen() {
     const day = DAYS[colIndex];
     const time = TIMES[rowIndex];
 
-    // Alert Logic
+    // --- ALERT LOGIC ---
+    // If it was already booked (red), it is now becoming available (green)
     if (isCurrentlyBooked) {
-      Alert.alert("Slot Unbooked", `${day} at ${time} is now Available.`);
+      Alert.alert(
+        "Slot Available",
+        `${day} at ${time} is now marked as Available.`
+      );
     } else {
-      Alert.alert("Slot Booked", `${day} at ${time} is now Booked.`);
+      // If it was available (green), it is now becoming booked (red)
+      Alert.alert(
+        "Slot Booked",
+        `${day} at ${time} is now marked as Booked.`
+      );
     }
 
-    // State Update
     const updatedGrid = bookedSlots.map((row, rIdx) => 
       rIdx === rowIndex 
         ? row.map((col, cIdx) => (cIdx === colIndex ? !col : col))
@@ -40,58 +49,79 @@ export default function CalenderScreen() {
     setBookedSlots(updatedGrid);
   };
 
+  const [loadingButton, setLoadingButton] = useState<null | 'save' | 'cancel'>(null);
+  const isLoading = !!loadingButton;
+
+  const handleSave = () => {
+    setLoadingButton('save');
+    setTimeout(() => {
+      setLoadingButton(null);
+      Alert.alert('Success', 'Availability saved successfully');
+      router.back();
+    }, 1000);
+  }; 
+
+  const handleCancel = () => {
+    setLoadingButton('cancel');
+    setTimeout(() => {
+      setLoadingButton(null);
+      router.back();
+    }, 500);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-[#2E7D32]">
-      <Stack.Screen options={{ headerShown: false }} />
+    <SafeAreaView className="flex-1 bg-white">
+      <Stack.Screen options={{ title: 'Manage Slots', headerShown: false }} />
       
-      <ScrollView contentContainerStyle={{ padding: 12 }}>
-       <View className="flex-row justify-between items-center mb-3">
-                  <Text className="text-xl font-bold text-white">Slots Available</Text>
-                  <View className="flex-row gap-2">
-                    <View className="flex-row items-center"><View className="w-2 h-2 bg-green-400 mr-1 rounded-full"/><Text className="text-white text-[8px]">Available</Text></View>
-                    <View className="flex-row items-center"><View className="w-2 h-2 bg-yellow-400 mr-1 rounded-full"/><Text className="text-white text-[8px]">Regular</Text></View>
-                    <View className="flex-row items-center"><View className="w-2 h-2 bg-red-500 mr-1 rounded-full"/><Text className="text-white text-[8px]">Booked</Text></View>
-                  </View>
-                </View>
-        
+      <ScrollView className="p-3" showsVerticalScrollIndicator={false}>
+        <View className="flex-row justify-between items-center mt-2 mb-3">
+          <Text className="text-xl font-bold text-black">Slots Available</Text>
+          <View className="flex-row gap-2">
+            <View className="flex-row items-center">
+                <Ionicons name="shirt-sharp" size={12} color="#4ade80" />
+                <Text className="text-black font-semibold text-[10px] ml-1">Available</Text>
+            </View>
+            <View className="flex-row items-center">
+                <Ionicons name="shirt-sharp" size={12} color="#ef4444" />
+                <Text className="text-black font-semibold text-[10px] ml-1">Booked</Text>
+            </View>
+          </View>
+        </View>
 
         {/* --- Grid Wrapper --- */}
-        <View className="bg-white rounded-xl p-1 shadow-md">
+        <View className="bg-secondary rounded-xl p-2 shadow-sm border border-gray-100">
           
           {/* Days Header */}
           <View className="flex-row items-center mb-2">
             <View className="w-10" /> 
             {DAYS.map((day) => (
               <View key={day} className="flex-1 items-center">
-                <Text className="text-[9px] font-bold text-gray-800">{day}</Text>
+                <Text className="text-[10px] font-bold text-gray-500">{day}</Text>
               </View>
             ))}
           </View>
 
-          {/* Time Rows (6 AM to 10 PM) */}
+          {/* Time Rows */}
           {TIMES.map((time, rowIndex) => (
-            <View key={time} className="flex-row p-[1px] items-center mb-[2px]">
-              {/* Left Side Time Label */}
-              <View className="w-10 items-start pl-1">
-                <Text className="text-[8px] font-bold text-gray-500">{time}</Text>
+            <View key={time} className="flex-row items-center mb-1">
+              <View className="w-10 items-start">
+                <Text className="text-[10px] font-bold text-gray-400">{time}</Text>
               </View>
 
-              {/* Day Slots */}
               {DAYS.map((_, colIndex) => {
                 const isBooked = bookedSlots[rowIndex][colIndex];
-                
                 return (
                   <TouchableOpacity 
                     key={colIndex} 
                     onPress={() => toggleSlot(rowIndex, colIndex)}
-                    activeOpacity={0.7}
-                    className={`flex-1 h-10 mx-[1px] rounded-sm justify-center items-center ${
-                      isBooked ? 'bg-red-500' : 'bg-[#4CAF50]'
-                    }`}
+                    activeOpacity={0.6}
+                    className="flex-1 h-10 mx-[2px] rounded-md justify-center items-center bg-gray-50 border border-gray-100"
                   >
-                    <Text className="text-white text-[6px] font-black text-center">
-                      {isBooked ? 'Booked' : 'Available'}
-                    </Text>
+                    <Ionicons 
+                        name="shirt-sharp" 
+                        size={22} 
+                        color={isBooked ? "#ef4444" : "#4ade80"} 
+                    />
                   </TouchableOpacity>
                 );
               })}
@@ -99,10 +129,30 @@ export default function CalenderScreen() {
           ))}
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity className="mt-6 bg-black p-4 rounded-xl items-center shadow-lg mb-10">
-          <Text className="text-white font-bold text-lg">Save Availability</Text>
-        </TouchableOpacity>
+        {/* --- Action Buttons --- */}
+        <View className="flex-row mt-8 items-center mb-10">
+          <TouchableOpacity
+            className={`bg-primary flex-1 rounded-xl py-4 mr-3 items-center ${isLoading ? 'opacity-50' : ''}`}
+            onPress={handleSave}
+            disabled={isLoading}
+          >
+            {loadingButton === 'save' ? (
+              <ActivityIndicator size="small" color="#000" />
+            ) : (
+              <Text className="text-black text-base font-bold">Save Changes</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`rounded-xl py-4 px-6 border border-gray-200 ${isLoading ? 'opacity-50' : ''}`}
+            onPress={handleCancel}
+            disabled={isLoading}
+          >
+            <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ height: insets.bottom + 70 }} />
       </ScrollView>
     </SafeAreaView>
   );

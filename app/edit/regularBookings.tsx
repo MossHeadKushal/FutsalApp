@@ -1,6 +1,7 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -17,6 +18,7 @@ type SlotStatus = 'Available' | 'Booked' | 'Regular';
 
 export default function RegularBookingsScreen() {
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   // State: 2D array managing the status of each slot
   const [bookedSlots, setBookedSlots] = useState<SlotStatus[][]>(
@@ -51,28 +53,56 @@ export default function RegularBookingsScreen() {
     setBookedSlots(updatedGrid);
   };
 
+  // Loading and action handlers (per-button loading)
+  const [loadingButton, setLoadingButton] = useState<null | 'save' | 'cancel'>(null);
+  const isLoading = !!loadingButton;
+
+  const handleSave = () => {
+    setLoadingButton('save');
+    const selectedCount = bookedSlots.flat().filter(s => s !== 'Available').length;
+    Alert.alert(
+      'Save Regular Schedule',
+      `Action: Save\nSelected slots: ${selectedCount}`
+    );
+    setTimeout(() => {
+      setLoadingButton(null);
+      router.back();
+    }, 1000);
+  };
+
+  const handleCancel = () => {
+    setLoadingButton('cancel');
+    // reset grid
+    setBookedSlots(Array(TIMES.length).fill(null).map(() => Array(DAYS.length).fill('Available')));
+    setTimeout(() => {
+      setLoadingButton(null);
+      router.back();
+    }, 1000);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-[#2E7D32]">
+    <SafeAreaView className="flex-1 bg-[#ffffff]">
       <Stack.Screen options={{ headerShown: false }} />
       
-      <ScrollView contentContainerStyle={{ padding: 12 }}>
+      <ScrollView className="p-3">
         <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-xl font-bold text-white">Regular Bookings</Text>
+          <Text className="text-xl font-bold text-black">Regular Bookings</Text>
           <View className="flex-row gap-2">
-            <View className="flex-row items-center"><View className="w-2 h-2 bg-yellow-400 mr-1 rounded-full"/><Text className="text-white text-[8px]">Regular</Text></View>
-            <View className="flex-row items-center"><View className="w-2 h-2 bg-red-500 mr-1 rounded-full"/><Text className="text-white text-[8px]">Booked</Text></View>
+              <View className="flex-row items-center"><View className="w-2 h-2 bg-green-400 mr-1 rounded-full"/><Text className="text-black font-semibold text-[8px]">Available</Text></View>
+            <View className="flex-row items-center"><View className="w-2 h-2 bg-yellow-400 mr-1 rounded-full"/><Text className="text-black font-semibold text-[8px]">Regular</Text></View>
+            <View className="flex-row items-center"><View className="w-2 h-2 bg-red-500 mr-1 rounded-full"/><Text className="text-black font-semibold text-[8px]">Booked</Text></View>
           </View>
         </View>
 
         {/* --- Grid Wrapper --- */}
-        <View className="bg-white rounded-xl p-1 shadow-md">
+        <View className="bg-secondary rounded-xl p-1 shadow-md">
           
           {/* Days Header */}
           <View className="flex-row items-center mb-2">
             <View className="w-10" /> 
             {DAYS.map((day) => (
               <View key={day} className="flex-1 items-center">
-                <Text className="text-[9px] font-bold text-gray-800">{day}</Text>
+                <Text className="text-[9px] font-bold text-black">{day}</Text>
               </View>
             ))}
           </View>
@@ -81,14 +111,14 @@ export default function RegularBookingsScreen() {
           {TIMES.map((time, rowIndex) => (
             <View key={time} className="flex-row items-center mb-[2px]">
               <View className="w-10 items-start pl-1">
-                <Text className="text-[8px] font-bold text-gray-500">{time}</Text>
+                <Text className="text-[8px] font-bold text-black">{time}</Text>
               </View>
 
               {DAYS.map((_, colIndex) => {
                 const status = bookedSlots[rowIndex][colIndex];
                 
                 // Set background color based on status
-                let bgColor = 'bg-[#4CAF50]'; // Default Available
+                let bgColor = 'bg-primary'; // Default Available
                 if (status === 'Regular') bgColor = 'bg-yellow-400';
                 if (status === 'Booked') bgColor = 'bg-red-500';
 
@@ -99,7 +129,7 @@ export default function RegularBookingsScreen() {
                     activeOpacity={0.7}
                     className={`flex-1 h-10 mx-[1px] rounded-sm justify-center items-center ${bgColor}`}
                   >
-                    <Text className={`text-center font-black text-[7px] ${status === 'Regular' ? 'text-black' : 'text-white'}`}>
+                    <Text className={`text-secondary font-semibold text-[6px] ${status === 'Regular' ? 'text-black' : 'text-white'}`}>
                       {status === 'Regular' ? 'Regular' : status === 'Booked' ? 'Booked' : 'Available'}
                     </Text>
                   </TouchableOpacity>
@@ -109,9 +139,33 @@ export default function RegularBookingsScreen() {
           ))}
         </View>
 
-        <TouchableOpacity className="mt-6 bg-black p-4 rounded-xl items-center shadow-lg mb-10">
-          <Text className="text-white font-bold text-lg">Save Regular Schedule</Text>
-        </TouchableOpacity>
+        {/* --- Action Buttons --- */}
+        <View className="flex-row mt-6 items-center mb-10">
+          <TouchableOpacity
+            className={`bg-primary rounded-lg py-3 px-5 mr-3 ${isLoading ? 'opacity-50' : ''}`}
+            onPress={handleSave}
+            disabled={isLoading}
+          >
+            {loadingButton === 'save' ? (
+              <ActivityIndicator size="small" color="#000" />
+            ) : (
+              <Text className="text-black text-base font-semibold">Save</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`rounded-lg py-3 border border-gray-400 px-5 ${isLoading ? 'opacity-50' : ''}`}
+            onPress={handleCancel}
+            disabled={isLoading}
+          >
+            {loadingButton === 'cancel' ? (
+              <ActivityIndicator size="small" color="#ef4444" />
+            ) : (
+              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+        <View style={{ height: insets.bottom + 70 }} />
       </ScrollView>
     </SafeAreaView>
   );

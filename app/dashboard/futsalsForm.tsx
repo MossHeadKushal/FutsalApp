@@ -51,11 +51,17 @@ const FutsalManagerForm: React.FC<FutsalManagerFormProps> = () => {
   
 
   const handleCreate = (andAnother: boolean = false) => {
+    setLoading(true);
     Alert.alert(
       'Form Submission',
       `Action: ${andAnother ? 'Create & Create Another' : 'Create'}\nName: ${name}\nSlug: ${slug}\nAddress: ${address}\nCourts: ${courts || 'Not Selected'}`
     );
     // Add logic for API call here
+    setTimeout(() => {
+          // navigate back after a short delay
+          setLoading(false);
+          router.back();
+        }, 1000);
   };
 
   const handleCancel = () => {
