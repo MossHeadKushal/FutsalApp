@@ -1,3 +1,4 @@
+import { AbhayaLibre_800ExtraBold, useFonts } from '@expo-google-fonts/abhaya-libre';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import React, { ComponentProps, useState } from 'react';
@@ -22,6 +23,14 @@ const NAV_ITEMS: { label: string; icon: IconName; route: string }[] = [
 ];
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    AbhayaLibre_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <AuthProvider>
       <MainContent />
@@ -50,9 +59,9 @@ function MainContent() {
       {!isLoginPage && (
         <>
           <StatusBar barStyle="dark-content" backgroundColor="#B7F000" />
-          <View 
-            style={{ height: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight }} 
-            className="bg-[#00c187] w-full" 
+          <View
+            style={{ height: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight }}
+            className="bg-[#00c187] w-full"
           />
         </>
       )}
@@ -68,7 +77,7 @@ function MainContent() {
 
       {/* 3. Global Navigation Menu */}
       {!isLoginPage && (
-        <View 
+        <View
           style={[
             styles.floatingBar,
             { bottom: Platform.OS === 'android' ? 40 : 30 }
@@ -77,7 +86,7 @@ function MainContent() {
           {NAV_ITEMS.map((item) => {
             // FIX: Use exact matching for Home to prevent "double active" state
             // and startsWith for others to allow sub-page highlighting.
-            const isActive = item.route === '/dashboard' 
+            const isActive = item.route === '/dashboard'
               ? pathname === '/dashboard' || pathname === '/dashboard/'
               : pathname.startsWith(item.route);
 
@@ -92,20 +101,20 @@ function MainContent() {
                     <View className="absolute w-10 h-auto bg-[#ffffff] rounded-full" />
                 )} */}
 
-                <View className={`items-center justify-center w-12 h-12  ${isActive ? 'bg-[#00c187] rounded-full': ''}`}>
-                  <Ionicons 
-                    name={item.icon} 
-                    size={22} 
-                    color={isActive ? '#ffffff' : '#6b7280'} 
+                <View className={`items-center justify-center w-12 h-12  ${isActive ? 'bg-[#00c187] rounded-full' : ''}`}>
+                  <Ionicons
+                    name={item.icon}
+                    size={22}
+                    color={isActive ? '#ffffff' : '#6b7280'}
                   />
                 </View>
 
                 {/* Disable text when NOT active */}
-                
-                  <Text className="text-[10px] mt-1 text-[#0f0D23] font-bold rounded-full">
-                    {item.label}
-                  </Text>
-                
+
+                <Text className="text-[10px] mt-1 text-[#0f0D23] font-bold rounded-full">
+                  {item.label}
+                </Text>
+
               </TouchableOpacity>
             );
           })}
@@ -144,7 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 10,
-    zIndex: 999, 
+    zIndex: 999,
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },

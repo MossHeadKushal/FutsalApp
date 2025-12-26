@@ -66,7 +66,7 @@ export default function Settings() {
       
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'android' ? 'padding' : undefined}
         // Adjust the offset below if the keyboard still covers inputs
         keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >

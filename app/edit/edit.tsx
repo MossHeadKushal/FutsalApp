@@ -2,37 +2,40 @@ import { useRouter } from 'expo-router';
 import React, { useState, } from 'react';
 import { ActivityIndicator, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+// Define a type for our loading states
+type LoadingState = 'save' | 'cancel' | null;
+
 export default function Edit() {
   const [name, setName] = useState<string>('');
   const [slug, setSlug] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [active, setActive] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<LoadingState>(null);
   const router = useRouter();
 
 
-  const handleCreate = (andAnother: boolean = false) => {
-     setLoading(true);
+  const handleCreate = () => {
+     setLoading('save');
     // Simulate form submission
-    alert(`Action: ${andAnother ? 'Create & Create Another' : 'Create'}\nName: ${name}\nSlug: ${slug}\nAddress: ${address}`);
+   // alert(`Action: ${andAnother ? 'Create & Create Another' : 'Create'}\nName: ${name}\nSlug: ${slug}\nAddress: ${address}`);
     // Add logic for API call here
     setTimeout(() => {
           // navigate back after a short delay
-          setLoading(false);
+          setLoading(null);
           router.back();
         }, 1000);
   }
 
 
   const handleCancel = () => {
-      setLoading(true);
+      setLoading('cancel');
       setName('');
       setSlug('');
       setAddress('');
       
         setTimeout(() => {
           // navigate back after a short delay
-          setLoading(false);
+          setLoading(null);
           router.back();
         }, 1000);
     };
@@ -96,29 +99,36 @@ export default function Edit() {
               thumbColor={active ? '#00c187' : '#f9fafb'}
             />
           </View>
+          
           {/* --- Action Buttons --- */}
-                        <View className="flex-row mt-3 items-center">
-                          <TouchableOpacity
-                            className={`bg-primary rounded-lg py-3 px-5 mr-3 ${loading ? 'opacity-50' : ''}`}
-                            onPress={() => handleCreate(false)}
-                            disabled={loading}
-                          >
-                            <Text className="text-black text-base font-semibold">Create</Text>
-                          </TouchableOpacity>
-                
-                    
-                          <TouchableOpacity
-                            className={`rounded-lg py-3 border border-gray-400 px-5 ${loading ? 'opacity-50' : ''}`}
-                            onPress={handleCancel}
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <ActivityIndicator size="small" color="#ef4444" />
-                            ) : (
-                              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
-                            )}
-                          </TouchableOpacity>
-                        </View>
+          <View className="flex-row mt-6 items-center">
+            
+            {/* Create Button */}
+            <TouchableOpacity
+              className={`bg-green-500 rounded-lg py-3 px-8 mr-3 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
+              onPress={handleCreate}
+              disabled={loading !== null}
+            >
+              {loading === 'save' ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-black text-base font-semibold">Save</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Cancel Button */}
+            <TouchableOpacity
+              className={`rounded-lg py-3 border border-gray-400 px-8 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
+              onPress={handleCancel}
+              disabled={loading !== null}
+            >
+              {loading === 'cancel' ? (
+                <ActivityIndicator size="small" color="#ef4444" />
+              ) : (
+                <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+              )}
+            </TouchableOpacity>
+            </View>
               </View>
       </View>
             

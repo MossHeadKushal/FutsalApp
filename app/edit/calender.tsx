@@ -1,21 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { assets } from '../../assets/assets';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const TIMES = Array.from({ length: 17 }, (_, i) => {
-  const hour = i + 6; 
+  const hour = i + 6;
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
   return `${displayHour} ${ampm}`;
 });
 
+// Define a type for our loading states
+type LoadingState = 'save' | 'cancel' | null;
+
+
 export default function CalenderScreen() {
-  const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const [loading, setLoading] = useState<LoadingState>(null);
 
   const [bookedSlots, setBookedSlots] = useState<boolean[][]>(
     Array(TIMES.length).fill(null).map(() => Array(DAYS.length).fill(false))
@@ -41,30 +46,27 @@ export default function CalenderScreen() {
       );
     }
 
-    const updatedGrid = bookedSlots.map((row, rIdx) => 
-      rIdx === rowIndex 
+    const updatedGrid = bookedSlots.map((row, rIdx) =>
+      rIdx === rowIndex
         ? row.map((col, cIdx) => (cIdx === colIndex ? !col : col))
         : row
     );
     setBookedSlots(updatedGrid);
   };
 
-  const [loadingButton, setLoadingButton] = useState<null | 'save' | 'cancel'>(null);
-  const isLoading = !!loadingButton;
-
-  const handleSave = () => {
-    setLoadingButton('save');
+  const handleCreate = () => {
+    setLoading('save');
     setTimeout(() => {
-      setLoadingButton(null);
+      setLoading(null);
       Alert.alert('Success', 'Availability saved successfully');
       router.back();
     }, 1000);
-  }; 
+  };
 
   const handleCancel = () => {
-    setLoadingButton('cancel');
+    setLoading('cancel');
     setTimeout(() => {
-      setLoadingButton(null);
+      setLoading(null);
       router.back();
     }, 500);
   };
@@ -72,28 +74,28 @@ export default function CalenderScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Stack.Screen options={{ title: 'Manage Slots', headerShown: false }} />
-      
+
       <ScrollView className="p-3" showsVerticalScrollIndicator={false}>
         <View className="flex-row justify-between items-center mt-2 mb-3">
           <Text className="text-xl font-bold text-black">Slots Available</Text>
           <View className="flex-row gap-2">
             <View className="flex-row items-center">
-                <Ionicons name="shirt-sharp" size={12} color="#4ade80" />
-                <Text className="text-black font-semibold text-[10px] ml-1">Available</Text>
+              <Ionicons name="shirt-sharp" size={12} color="#4ade80" />
+              <Text className="text-black font-semibold text-[10px] ml-1">Available</Text>
             </View>
             <View className="flex-row items-center">
-                <Ionicons name="shirt-sharp" size={12} color="#ef4444" />
-                <Text className="text-black font-semibold text-[10px] ml-1">Booked</Text>
+              <Ionicons name="shirt-sharp" size={12} color="#ef4444" />
+              <Text className="text-black font-semibold text-[10px] ml-1">Booked</Text>
             </View>
           </View>
         </View>
 
         {/* --- Grid Wrapper --- */}
         <View className="bg-secondary rounded-xl p-2 shadow-sm border border-gray-100">
-          
+
           {/* Days Header */}
           <View className="flex-row items-center mb-2">
-            <View className="w-10" /> 
+            <View className="w-10" />
             {DAYS.map((day) => (
               <View key={day} className="flex-1 items-center">
                 <Text className="text-[10px] font-bold text-gray-500">{day}</Text>
@@ -111,16 +113,21 @@ export default function CalenderScreen() {
               {DAYS.map((_, colIndex) => {
                 const isBooked = bookedSlots[rowIndex][colIndex];
                 return (
-                  <TouchableOpacity 
-                    key={colIndex} 
+                  <TouchableOpacity
+                    key={colIndex}
                     onPress={() => toggleSlot(rowIndex, colIndex)}
                     activeOpacity={0.6}
-                    className="flex-1 h-10 mx-[2px] rounded-md justify-center items-center bg-gray-50 border border-gray-100"
+                    className="flex-1 h-10 mx-[2px] rounded-md justify-center items-center bg-secondary border border-gray-100"
                   >
-                    <Ionicons 
+                    {/* <Ionicons 
                         name="shirt-sharp" 
                         size={22} 
                         color={isBooked ? "#ef4444" : "#4ade80"} 
+                    /> */}
+                    <Image
+                      source={assets.jersey}
+                      className="w-6 h-6"
+                      style={{ tintColor: isBooked ? "#ef4444" : "#4ade80" }}
                     />
                   </TouchableOpacity>
                 );
@@ -130,29 +137,36 @@ export default function CalenderScreen() {
         </View>
 
         {/* --- Action Buttons --- */}
-        <View className="flex-row mt-8 items-center mb-10">
+        <View className="flex-row mt-6 items-center">
+
+          {/* Create Button */}
           <TouchableOpacity
-            className={`bg-primary flex-1 rounded-xl py-4 mr-3 items-center ${isLoading ? 'opacity-50' : ''}`}
-            onPress={handleSave}
-            disabled={isLoading}
+            className={`bg-green-500 rounded-lg py-3 px-8 mr-3 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
+            onPress={handleCreate}
+            disabled={loading !== null}
           >
-            {loadingButton === 'save' ? (
-              <ActivityIndicator size="small" color="#000" />
+            {loading === 'save' ? (
+              <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text className="text-black text-base font-bold">Save Changes</Text>
+              <Text className="text-black text-base font-semibold">Save</Text>
             )}
           </TouchableOpacity>
 
+          {/* Cancel Button */}
           <TouchableOpacity
-            className={`rounded-xl py-4 px-6 border border-gray-200 ${isLoading ? 'opacity-50' : ''}`}
+            className={`rounded-lg py-3 border border-gray-400 px-8 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
             onPress={handleCancel}
-            disabled={isLoading}
+            disabled={loading !== null}
           >
-            <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+            {loading === 'cancel' ? (
+              <ActivityIndicator size="small" color="#ef4444" />
+            ) : (
+              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+            )}
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: insets.bottom + 70 }} />
+        <View style={{ height: insets.bottom + 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
