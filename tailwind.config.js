@@ -8,6 +8,7 @@ module.exports = {
         small: ['DMSans_400Regular'],
         semibold: ['DMSans_600SemiBold'],
         medium: ['DMSans_500Medium'],
+        semimedium: ['DMSans_600Medium'],
         bold: ['DMSans_700Bold'],
         AbhayaLibre_ExtraBold: ["AbhayaLibre_800ExtraBold"],
       },
@@ -16,7 +17,7 @@ module.exports = {
         secondary: "#f1fcf6",
         light: {
           100: '#ffffff',
-          200: '#228F4C',
+          200: '#0ABC36',
           300: '#9CA4AB',
         },
         dark: {

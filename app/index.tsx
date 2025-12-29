@@ -16,6 +16,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -126,117 +127,103 @@ export default function Login(): JSX.Element {
     }, 2000);
   };
   return (
-    <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === 'android' ? 'padding' : undefined}>
-      <LinearGradient colors={['#0D2D15', '#205E30']} className="flex-1">
+    <KeyboardAvoidingView className="flex-1 bg-[#F0F4F9]" behavior={Platform.OS === 'android' ? 'padding' : undefined} >
+      <LinearGradient colors={['#205E30', '#0ABC36']} className="flex-1">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-center items-center px-6 h-[100%]">
-            <View className='flex-row items-center justify-center mb-10'>
-              <Image source={assets.futsal} className="w-24 h-24 mb-10" tintColor={"white"} />
-              <Text className="text-2xl font-AbhayaLibre_ExtraBold text-light-100 mb-[-24] ml-[-14]">Smart Futsal</Text>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="flex-1 items-center h-full min-h-screen">
+              <View className='h-[35%] w-full'>
+                <View className='gap-[26px] px-[31px] py-[107px] mt-[90px]'>
+                  <Image source={assets.logo} className="w-[280px] h-[100px] " />
+                </View>
+              </View>
+
+              <View className='h-[65%] w-full bg-[#F0F4F9] pt-10 px-4 rounded-t-3xl'>
+                <View className='w-full gap-6 p-[12px]'>
+                  {/* Username Group */}
+                  <Text className='text-2xl text-dark-100 font-bold opacity-100 mb-[16px]'>Log In to your Account</Text>
+                  <View className='gap-4'>
+                    <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Username</Text>
+                    <TextInput
+                      className="w-full border border-[#5F6567] text-dark-100 font-medium text-[16px] rounded-lg px-4 py-3 h-[50px]"
+                      placeholder="Enter your mobile number"
+                      value={email}
+                      onChangeText={setEmail}
+                      autoCapitalize="none"
+                    />
+                    {emailError && <Text className="text-red-500 text-sm">{emailError}</Text>}
+                  </View>
+
+                  {/* Password Group */}
+                  <View className='gap-4'>
+                    <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Password</Text>
+                    <View className="relative w-full">
+                      <TextInput
+                        className="w-full border border-[#5F6567] text-dark-100 font-semibold text-[16px] rounded-lg px-4 py-3 pr-12 h-[50px]"
+                        placeholder="Enter your password"
+                        secureTextEntry={!isPasswordVisible}
+                        value={password}
+                        onChangeText={setPassword}
+                      />
+                      <TouchableOpacity
+                        className="absolute right-4 top-3.5"
+                        onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                      >
+                        <Ionicons
+                          name={isPasswordVisible ? 'eye-off' : 'eye'}
+                          size={22}
+                          color="#5F6567"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {passwordError && <Text className="text-red-500 text-sm">{passwordError}</Text>}
+                  </View>
+
+                  {/* Remember Me */}
+                  <View className="gap-6">
+                    <TouchableOpacity
+                      className="flex-row items-center self-start"
+                      onPress={() => setRememberMe(!rememberMe)}
+                    >
+                      <Ionicons
+                        name={rememberMe ? 'checkbox' : 'square-outline'}
+                        size={22}
+                        color="#5F6567"
+                      />
+                      <Text className="ml-2 text-dark-100 font-small">Remember Me</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Login Button */}
+                  <View className="gap-4">
+                    <TouchableOpacity className="w-full bg-light-200 h-14 rounded-lg items-center justify-center mt-2" onPress={handleLogin} disabled={loading}>
+                      {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white text-lg font-semibold">Login</Text>}
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Biometric Button */}
+                  <View className="gap-4">
+                    {isBiometricSupported && (
+                      <TouchableOpacity
+                        className="flex-col items-center justify-center"
+                        onPress={handleBiometricAuth}
+                      >
+                        <Ionicons name="finger-print" size={45} color="#5F6567" />
+                        <Text className="mt-2 text-dark-100 font-bold">Login with Fingerprint</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </View>
             </View>
-            <View className='w-full relative mb-4'>
-              <Text className="text-lg text-light-100 font-bold mb-2">Username</Text>
-              {/* ... TextInputs remain the same ... */}
-              <TextInput
-                className="w-full border border-light-100 text-light-100  rounded-lg px-4 py-3 mb-4"
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-              />
-              {emailError && <Text className="text-red-500 text-sm mb-2">{emailError}</Text>}
-
-              <Text className="text-lg text-light-100 font-bold mb-2">Password</Text>
-
-              <TextInput
-
-                className="w-full border border-light-100 text-light-100 rounded-lg px-4 py-3 pr-12"
-
-                placeholder="Password"
-
-                secureTextEntry={!isPasswordVisible}
-
-                value={password}
-
-                onChangeText={setPassword}
-
-              />
-
-              <TouchableOpacity
-
-                className="absolute right-3 top-36"
-
-                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-
-              >
-
-                <Ionicons
-
-                  name={isPasswordVisible ? 'eye-off' : 'eye'}
-
-                  size={22}
-
-                  color="white"
-
-                />
-
-              </TouchableOpacity>
-
-
-
-              {passwordError && (
-                <Text className="text-red-500 text-sm mt-2">{passwordError}</Text>
-              )}
-
-
-
-
-
-              {/* 🔹 Remember Me */}
-
-              <TouchableOpacity
-
-                className="flex-row items-center self-start mb-6 mt-6"
-
-                onPress={() => setRememberMe(!rememberMe)}
-
-              >
-
-                <Ionicons
-
-                  name={rememberMe ? 'checkbox' : 'square-outline'}
-
-                  size={22}
-
-                  color="white"
-
-                />
-
-                <Text className="ml-2 text-light-100 font-bold">Remember Me</Text>
-
-              </TouchableOpacity>
-
-
-
-              <TouchableOpacity className="w-full bg-light-200 py-3 rounded-lg items-center" onPress={handleLogin} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white text-lg font-semibold">Login</Text>}
-              </TouchableOpacity>
-
-              {/* 🔹 Biometric Button */}
-              {isBiometricSupported && (
-                <TouchableOpacity
-                  className="mt-6 flex-row items-center justify-center"
-                  onPress={handleBiometricAuth}
-                >
-                  <Ionicons name="finger-print" size={45} color="white" />
-                  <Text className="ml-2 text-light-100 font-bold">Login with Fingerprint</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
+          </ScrollView>
         </TouchableWithoutFeedback>
-      </LinearGradient>
 
+      </LinearGradient>
     </KeyboardAvoidingView >
   );
 }

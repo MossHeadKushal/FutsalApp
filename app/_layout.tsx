@@ -58,10 +58,10 @@ function MainContent() {
       {/* 1. TOP HEADER AREA (Light Green) */}
       {!isLoginPage && (
         <>
-          <StatusBar barStyle="dark-content" backgroundColor="#B7F000" />
+          <StatusBar barStyle="dark-content" backgroundColor="#205E30" />
           <View
-            style={{ height: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight }}
-            className="bg-[#00c187] w-full"
+            style={{ height: Platform.OS === 'android' ? 50 : StatusBar.currentHeight }}
+            className="bg-[#205E30] w-full"
           />
         </>
       )}
