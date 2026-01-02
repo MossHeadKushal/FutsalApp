@@ -15,6 +15,7 @@ export interface Futsal {
 interface FutsalContextType {
     futsals: Futsal[];
     addFutsal: (futsal: Omit<Futsal, 'id' | 'status'>) => void;
+    updateFutsal: (id: string, updatedData: Partial<Futsal>) => void;
 }
 
 // Create Context
@@ -55,8 +56,16 @@ export const FutsalProvider = ({ children }: { children: ReactNode }) => {
         setFutsals((prev) => [newFutsal, ...prev]);
     };
 
+    const updateFutsal = (id: string, updatedData: Partial<Futsal>) => {
+        setFutsals((prev) =>
+            prev.map((futsal) =>
+                futsal.id === id ? { ...futsal, ...updatedData } : futsal
+            )
+        );
+    };
+
     return (
-        <FutsalContext.Provider value={{ futsals, addFutsal }}>
+        <FutsalContext.Provider value={{ futsals, addFutsal, updateFutsal }}>
             {children}
         </FutsalContext.Provider>
     );

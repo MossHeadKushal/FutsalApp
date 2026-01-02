@@ -4,13 +4,15 @@ import React, { memo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { assets } from '../../assets/assets';
 
 // --- Types & Constants ---
 type SlotStatus = 'available' | 'regular' | 'booked';
@@ -24,15 +26,15 @@ const TIMES = Array.from({ length: 17 }, (_, i) => {
 });
 
 // 🔹 OPTIMIZED COMPONENT: Only re-renders if its own status changes
-const GridSlot = memo(({ 
-  status, 
-  onPress 
-}: { 
-  status: SlotStatus; 
-  onPress: () => void 
+const GridSlot = memo(({
+  status,
+  onPress
+}: {
+  status: SlotStatus;
+  onPress: () => void
 }) => {
   const color = status === 'booked' ? '#ef4444' : status === 'regular' ? '#eab308' : '#4ade80';
-  
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -74,23 +76,23 @@ export default function CalenderScreen() {
     });
   }, []);
 
-   const handleCreate = () => {
-      setLoading('save');
-      setTimeout(() => {
-        setLoading(null);
-        Alert.alert('Success', 'Availability saved successfully');
-        router.back();
-      }, 1000);
-    }; 
-  
-    const handleCancel = () => {
-      setLoading('cancel');
-      setTimeout(() => {
-        setLoading(null);
-        router.back();
-      }, 500);
-    };
-  
+  const handleCreate = () => {
+    setLoading('save');
+    setTimeout(() => {
+      setLoading(null);
+      Alert.alert('Success', 'Availability saved successfully');
+      router.back();
+    }, 1000);
+  };
+
+  const handleCancel = () => {
+    setLoading('cancel');
+    setTimeout(() => {
+      setLoading(null);
+      router.back();
+    }, 500);
+  };
+
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -106,13 +108,15 @@ export default function CalenderScreen() {
           </View>
         </View>
 
-        <View className="bg-gray-50 rounded-xl p-2 border border-gray-100">
+        {/* --- Grid Wrapper --- */}
+        <View className="bg-secondary rounded-xl p-2 shadow-sm border border-gray-100">
+
           {/* Days Header */}
           <View className="flex-row items-center mb-2">
             <View className="w-10" />
             {DAYS.map((day) => (
               <View key={day} className="flex-1 items-center">
-                <Text className="text-[10px] font-bold text-gray-400">{day}</Text>
+                <Text className="text-[10px] font-bold text-gray-500">{day}</Text>
               </View>
             ))}
           </View>
@@ -120,51 +124,66 @@ export default function CalenderScreen() {
           {/* Time Rows */}
           {TIMES.map((time, rowIndex) => (
             <View key={time} className="flex-row items-center mb-1">
-              <View className="w-10">
-                <Text className="text-[9px] font-bold text-gray-400">{time}</Text>
+              <View className="w-10 items-start">
+                <Text className="text-[10px] font-bold text-gray-400">{time}</Text>
               </View>
 
-              {DAYS.map((_, colIndex) => (
-                <GridSlot
-                  key={`${rowIndex}-${colIndex}`}
-                  status={bookedSlots[rowIndex][colIndex]}
-                  onPress={() => toggleSlot(rowIndex, colIndex)}
-                />
-              ))}
+              {DAYS.map((_, colIndex) => {
+                const isBooked = bookedSlots[rowIndex][colIndex];
+                return (
+                  <TouchableOpacity
+                    key={colIndex}
+                    onPress={() => toggleSlot(rowIndex, colIndex)}
+                    activeOpacity={0.6}
+                    className="flex-1 h-10 mx-[2px] rounded-md justify-center items-center bg-secondary border border-gray-100"
+                  >
+                    {/* <Ionicons 
+                              name="shirt-sharp" 
+                              size={22} 
+                              color={isBooked ? "#ef4444" : "#4ade80"} 
+                          /> */}
+                    <Image
+                      source={assets.jersey}
+                      className="w-6 h-6"
+                      style={{ tintColor: isBooked ? "#ef4444" : "#4ade80" }}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           ))}
         </View>
 
-         {/* --- Action Buttons --- */}
-                        <View className="flex-row mt-6 items-center">
-                          
-                          {/* Create Button */}
-                          <TouchableOpacity
-                            className={`bg-green-500 rounded-lg py-3 px-8 mr-3 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
-                            onPress={handleCreate}
-                            disabled={loading !== null}
-                          >
-                            {loading === 'save' ? (
-                              <ActivityIndicator size="small" color="#fff" />
-                            ) : (
-                              <Text className="text-black text-base font-semibold">Save</Text>
-                            )}
-                          </TouchableOpacity>
-              
-                          {/* Cancel Button */}
-                          <TouchableOpacity
-                            className={`rounded-lg py-3 border border-gray-400 px-8 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
-                            onPress={handleCancel}
-                            disabled={loading !== null}
-                          >
-                            {loading === 'cancel' ? (
-                              <ActivityIndicator size="small" color="#ef4444" />
-                            ) : (
-                              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
-                            )}
-                          </TouchableOpacity>
-                          </View>
-            
+        {/* --- Action Buttons --- */}
+        <View className="flex-row mt-6 items-center">
+
+          {/* Create Button */}
+          <TouchableOpacity
+            className={`bg-green-500 rounded-lg py-3 px-8 mr-3 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
+            onPress={handleCreate}
+            disabled={loading !== null}
+          >
+            {loading === 'save' ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text className="text-black text-base font-semibold">Save</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Cancel Button */}
+          <TouchableOpacity
+            className={`rounded-lg py-3 border border-gray-400 px-8 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
+            onPress={handleCancel}
+            disabled={loading !== null}
+          >
+            {loading === 'cancel' ? (
+              <ActivityIndicator size="small" color="#ef4444" />
+            ) : (
+              <Text className="text-red-500 text-base font-semibold">Cancel</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
         <View style={{ height: insets.bottom + 100 }} />
       </ScrollView>
     </SafeAreaView>

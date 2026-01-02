@@ -1,137 +1,213 @@
-import { useRouter } from 'expo-router';
-import React, { useState, } from 'react';
-import { ActivityIndicator, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker'; // Added
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFutsals } from '../context/FutsalContext';
 
-// Define a type for our loading states
-type LoadingState = 'save' | 'cancel' | null;
-
-export default function Edit() {
+export default function EditFutsal() {
+  const [loading, setLoading] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [slug, setSlug] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [active, setActive] = useState<boolean>(true);
-  const [loading, setLoading] = useState<LoadingState>(null);
+  const [courts, setCourts] = useState<string>('');
+  const [image, setImage] = useState<string>(''); // Stores local URI
+
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { id } = useLocalSearchParams(); // Get ID from query params
+  const { futsals, addFutsal, updateFutsal } = useFutsals();
 
+  // Load existing data if editing
+  React.useEffect(() => {
+    if (id) {
+      const futsalToEdit = futsals.find(f => f.id === id);
+      if (futsalToEdit) {
+        setName(futsalToEdit.name);
+        setSlug(futsalToEdit.slug || '');
+        setAddress(futsalToEdit.address);
+        setCourts(futsalToEdit.courts.toString());
+        setImage(futsalToEdit.image || '');
+      }
+    }
+  }, [id, futsals]);
 
-  const handleCreate = () => {
-     setLoading('save');
-    // Simulate form submission
-   // alert(`Action: ${andAnother ? 'Create & Create Another' : 'Create'}\nName: ${name}\nSlug: ${slug}\nAddress: ${address}`);
-    // Add logic for API call here
+  // Function to pick image from mobile device
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need gallery permissions to upload photos');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const handleSave = (andAnother: boolean = false) => {
+    if (!name || !address || !courts) {
+      Alert.alert('Error', 'Name, Address and Courts are required');
+      return;
+    }
+
+    setLoading(true);
+
+    if (id) {
+      // Edit Mode
+      updateFutsal(id as string, {
+        name,
+        slug,
+        address,
+        courts: parseInt(courts) || 0,
+        image,
+      });
+      Alert.alert('Success', 'Futsal Updated Successfully');
+    } else {
+      // Create Mode (Not used in this file but good for consistency)
+      addFutsal({
+        name,
+        slug,
+        address,
+        courts: parseInt(courts) || 0,
+        image,
+      });
+      Alert.alert('Success', 'Futsal Created Successfully');
+    }
+
     setTimeout(() => {
-          // navigate back after a short delay
-          setLoading(null);
-          router.back();
-        }, 1000);
-  }
-
+      setLoading(false);
+      router.back();
+    }, 500);
+  };
 
   const handleCancel = () => {
-      setLoading('cancel');
-      setName('');
-      setSlug('');
-      setAddress('');
-      
-        setTimeout(() => {
-          // navigate back after a short delay
-          setLoading(null);
-          router.back();
-        }, 1000);
-    };
+    setLoading(true);
+    setName('');
+    setSlug('');
+    setAddress('');
+    setCourts('');
+    setImage('');
+    setTimeout(() => {
+      setLoading(false);
+      router.back();
+    }, 500);
+  };
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="p-5 flex-1">
-        {/* Title */}
-        <Text className="text-2xl font-bold text-black mb-8">
-          Edit Futsal
-        </Text>
-
-        {/* Form */}
-        <View className="">
-          {/* Name */}
-          <View>
-            <Text className="text-sm font-semibold text-black mb-1">Name</Text>
-            <TextInput
-              className="bg-secondary rounded-lg h-12 px-4 text-white"
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter full name"
-              placeholderTextColor="#A0A0A0"
-            />
+    <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'android' ? 'padding' : undefined} >
+      {/* Header Section */}
+      <View className="h-[10%] bg-[#205E30]">
+        <View className="flex-row items-center gap-3 p-5 mt-[12px]">
+          <TouchableOpacity activeOpacity={0.7} onPress={handleCancel}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <View className="flex-1 items-center">
+            <Text className="text-white text-xl font-bold">Edit Futsal</Text>
           </View>
-
-          {/* Slug */}
-          <View>
-            <Text className="text-sm font-semibold text-black mt-1 mb-1">Slug *</Text>
-            <TextInput
-              className="bg-secondary rounded-lg h-12 px-4 text-white"
-              value={slug}
-              onChangeText={setSlug}
-              placeholder="Enter unique slug"
-              placeholderTextColor="#A0A0A0"
-            />
-          </View>
-
-          {/* Address */}
-          <View>
-            <Text className="text-sm font-semibold text-black mt-1 mb-1">Address *</Text>
-            <TextInput
-              className="bg-secondary rounded-lg h-12 px-4 text-white"
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Enter your address"
-              placeholderTextColor="#A0A0A0"
-            />
-          </View>
-
-          {/* Active Switch */}
-          <View className="flex-row items-center justify-end mt-4">
-            <Text className="text-base text-black font-semibold">
-              {active ? 'Active' : 'Inactive'}
-            </Text>
-
-            <Switch
-              value={active}
-              onValueChange={setActive}
-              trackColor={{ false: '#525252', true: '#00c187' }}
-              thumbColor={active ? '#00c187' : '#f9fafb'}
-            />
-          </View>
-          
-          {/* --- Action Buttons --- */}
-          <View className="flex-row mt-6 items-center">
-            
-            {/* Create Button */}
-            <TouchableOpacity
-              className={`bg-green-500 rounded-lg py-3 px-8 mr-3 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
-              onPress={handleCreate}
-              disabled={loading !== null}
-            >
-              {loading === 'save' ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text className="text-black text-base font-semibold">Save</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Cancel Button */}
-            <TouchableOpacity
-              className={`rounded-lg py-3 border border-gray-400 px-8 flex-row items-center justify-center ${loading ? 'opacity-50' : ''}`}
-              onPress={handleCancel}
-              disabled={loading !== null}
-            >
-              {loading === 'cancel' ? (
-                <ActivityIndicator size="small" color="#ef4444" />
-              ) : (
-                <Text className="text-red-500 text-base font-semibold">Cancel</Text>
-              )}
-            </TouchableOpacity>
-            </View>
-              </View>
+        </View>
       </View>
-            
-    </View>
+
+      {/* Form Content Area */}
+      <View className="h-[90%] mt-4 flex-row px-4 py-4 flex-1 bg-[#F0F4F9]">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View className="w-full gap-6 mt-4">
+
+            {/* Image Selection Section (Replacing Image URL TextInput) */}
+            <View className="gap-2">
+              <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Futsal Image</Text>
+              <TouchableOpacity
+                onPress={pickImage}
+                className="w-full border border-[#5F6567] bg-white rounded-lg overflow-hidden justify-center items-center h-[120px]"
+              >
+                {image ? (
+                  <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} />
+                ) : (
+                  <View className="items-center">
+                    <Ionicons name="image-outline" size={32} color="#9CA3AF" />
+                    <Text className="text-gray-400 font-medium">Click to select photo</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {image && (
+                <TouchableOpacity onPress={() => setImage('')}>
+                  <Text className="text-red-500 text-right text-xs">Clear Photo</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Futsal Name */}
+            <View className='gap-2'>
+              <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Futsal Name</Text>
+              <TextInput
+                className="w-full border border-[#5F6567] text-dark-100 font-medium text-[16px] rounded-lg px-4 py-3 h-[50px]"
+                placeholder="Enter futsal name"
+                placeholderTextColor="#9CA3AF"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+
+            {/* Slug */}
+            <View className='gap-2'>
+              <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Slug</Text>
+              <TextInput
+                className="w-full border border-[#5F6567] text-dark-100 font-medium text-[16px] rounded-lg px-4 py-3 h-[50px]"
+                placeholder="Enter futsal's slug"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="none"
+                value={slug}
+                onChangeText={setSlug}
+              />
+            </View>
+
+            {/* Address */}
+            <View className='gap-2'>
+              <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Address</Text>
+              <TextInput
+                className="w-full border border-[#5F6567] text-dark-100 font-medium text-[16px] rounded-lg px-4 py-3 h-[50px]"
+                placeholder="Enter futsal's address"
+                placeholderTextColor="#9CA3AF"
+                value={address}
+                onChangeText={setAddress}
+              />
+            </View>
+
+            {/* Number of courts */}
+            <View className='gap-2'>
+              <Text className="text-lg text-dark-100 font-medium text-[16px] opacity-100">Number of Courts</Text>
+              <TextInput
+                className="w-full border border-[#5F6567] text-dark-100 font-medium text-[16px] rounded-lg px-4 py-3 h-[50px]"
+                placeholder="Enter number of courts"
+                placeholderTextColor="#9CA3AF"
+                keyboardType='numeric'
+                value={courts}
+                onChangeText={setCourts}
+              />
+            </View>
+
+            <TouchableOpacity
+              className="bg-[#00D04C] py-4 rounded-xl mt-6 shadow-sm active:opacity-90 items-center justify-center"
+              onPress={() => handleSave(false)}
+              disabled={loading}
+            >
+              <Text className="text-white text-center font-bold text-lg">Save</Text>
+            </TouchableOpacity>
+            <View style={{ height: insets.bottom + 70 }} />
+          </View>
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

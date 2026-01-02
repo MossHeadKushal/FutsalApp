@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker'; // Added
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFutsals } from '../context/FutsalContext';
 
 export default function CreateFutsal() {
@@ -14,6 +15,7 @@ export default function CreateFutsal() {
   const [image, setImage] = useState<string>(''); // Stores local URI
 
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { addFutsal } = useFutsals();
 
   // Function to pick image from mobile device
@@ -184,6 +186,7 @@ export default function CreateFutsal() {
               <Text className="text-white text-center font-bold text-lg">Create</Text>
             </TouchableOpacity>
 
+            <View style={{ height: insets.bottom + 70 }} />
           </View>
         </ScrollView>
       </View>
