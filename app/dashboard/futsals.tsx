@@ -1,172 +1,150 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import {
-  FlatList,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useMemo, useState } from 'react';
+import { FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-interface Futsal {
-  id: string;
-  name: string;
-  address: string;
-  courts: number;
+import { useRouter } from 'expo-router';
+import { useFutsals } from '../context/FutsalContext';
+
+interface FutsalCardProps {
+  item: {
+    id: string;
+    name: string;
+    address: string;
+    courts: number;
+    status: string;
+  };
+  router: any;
 }
 
-export default function Futsals() {
-  const router = useRouter();
-
-  // Example data
-  const data: Futsal[] = [
-    { id: '1', name: 'Blue Arena', address: 'Kathmandu', courts: 3 },
-    { id: '2', name: 'Red Court', address: 'Lalitpur', courts: 2 },
-  ];
-
-  // Track which Futsal dropdown is open (by id)
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-
-  const renderItem = ({ item }: { item: Futsal }) => {
-    const isDropdownVisible = openDropdownId === item.id;
-
-    return (
-      <View className="flex-col px-3 py-3 bg-secondary border-b border-white/5 rounded-lg mb-2 relative">
-        {/* Row content */}
-        <View className="flex-row items-center">
-          <Text className="flex-1 text-black">{item.name}</Text>
-          <Text className="flex-1 text-black">{item.address}</Text>
-          <Text className="flex-1 text-black">{item.courts}</Text>
-
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation(); 
-              setOpenDropdownId(isDropdownVisible ? null : item.id);
-            }}
-            className="px-2 py-1 rounded-lg ml-2 z-10"
-          >
-            <Ionicons name="ellipsis-vertical" size={18} color="black" />
-          </TouchableOpacity>
+const FutsalCard = ({ item, router }: FutsalCardProps) => (
+  <View className="bg-white mx-4 mt-4 p-4 rounded-3xl border border-gray-100 shadow-sm">
+    {/* Card Header: Name and Badges */}
+    <View className="flex-row justify-between items-start mb-2">
+      <Text className="text-lg font-bold text-gray-800 flex-1">{item.name}</Text>
+      <View className="flex-row space-x-2">
+        <View className="bg-green-50 px-3 py-1 rounded-full">
+          <Text className="text-green-500 text-[10px] font-medium">{item.status}</Text>
         </View>
-
-        {/* Floating dropdown menu */}
-        {isDropdownVisible && (
-          <Pressable
-            onPress={(e) => e.stopPropagation()} 
-            className="absolute top-10 right-0 w-42 bg-[#d1f5ff] rounded-lg shadow-lg z-20"
-          >
-            <TouchableOpacity
-              onPress={() => {
-                router.push({ pathname: '/edit/edit', params: { id: item.id } });
-                setOpenDropdownId(null);
-              }}
-                className="py-2 px-2 flex-row gap-1 border-b border-gray-300"
-            >
-              <Ionicons name="pencil-outline" size={18} color="black" />
-              <Text className="text-black font-semibold">Edit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                router.push({ pathname: '/edit/courts', params: { id: item.id } });
-                setOpenDropdownId(null);
-              }}
-              className="py-2 px-2 flex-row gap-1 border-b border-gray-300"
-            >
-              <Ionicons name="football" size={18} color="black" />
-              <Text className="text-black font-semibold">Courts</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                router.push({ pathname: '/edit/calender', params: { id: item.id } });
-                setOpenDropdownId(null);
-              }}
-              className="py-2 px-2 flex-row gap-1 border-b border-gray-300"
-            >
-              <Ionicons name="calendar-outline" size={18} color="black" />
-              <Text className="text-black font-semibold">Calender</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                router.push({ pathname: '/edit/regularBookings', params: { id: item.id } });
-                setOpenDropdownId(null);
-              }}
-              className="py-2 px-2 gap-1 flex-row mt-auto border-b border-gray-300"
-            >
-              <Ionicons name="calendar-outline" size={18} color="black" />
-              <Text className="text-black font-semibold">Regular Bookings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-            onPress={() => {
-                router.push({ pathname: '/edit/setting', params: { id: item.id } });
-                setOpenDropdownId(null);
-              }}
-            className="py-2 px-2 flex-row gap-1">
-              <Ionicons name="settings-outline" size={18} color="black" />
-              <Text className="text-black font-semibold">Settings</Text>
-            </TouchableOpacity>
-          </Pressable>
-        )}
       </View>
-    );
-  };
+    </View>
 
-  return (
-    <Pressable
-      className="flex-1 bg-white px-4 py-6"
-      onPress={() => setOpenDropdownId(null)} 
-    >
-      {/* Header */}
-      <View className='w-full'>
-      <View className="flex-row justify-between items-center mb-6">
-        
-        <Text className="text-black text-2xl font-bold">Futsals</Text>
+    {/* Location Info */}
+    <View className="mb-4">
+      <View className="flex-row items-center mb-1">
+        <Ionicons name="location-sharp" size={14} color="#6B7280" />
+        <Text className="text-gray-500 ml-2 text-xs">{item.address}</Text>
+      </View>
+      <View className="flex-row items-center">
+        <MaterialCommunityIcons name="soccer-field" size={14} color="#6B7280" />
+        <Text className="text-gray-500 ml-2 text-xs">{item.courts} Courts</Text>
+      </View>
+    </View>
 
+    {/* Action Buttons */}
+    <View className="flex-row justify-between items-center">
+      <TouchableOpacity
+        className="bg-[#00D04C] px-6 py-2.5 rounded-xl"
+        onPress={() => router.push({ pathname: '/edit/calender', params: { id: item.id } })}
+      >
+        <Text className="text-white font-bold text-sm">View Details</Text>
+      </TouchableOpacity>
+
+      <View className="flex-row space-x-3">
         <TouchableOpacity
-          onPress={() => router.push('/dashboard/futsalsForm')}
-          className="bg-primary px-4 py-2 rounded-full"
+          className="p-1.5 border border-gray-200 rounded-lg"
+          onPress={() => router.push({ pathname: '/edit/edit', params: { id: item.id } })}
         >
-          <Text className="text-black text-[11px] font-semibold">New Futsals</Text>
+          <Ionicons name="create-outline" size={20} color="#4B5563" />
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-[#00D04C] p-2 rounded-lg">
+          <Ionicons name="trash-outline" size={18} color="white" />
         </TouchableOpacity>
       </View>
-      </View>
+    </View>
+  </View>
+);
 
-      {/* Search */}
-      
-        <View className="flex-row bg-secondary border-hairline mb-4 p-2 items-center rounded-full px-2 py-2 w-full">
-          <Ionicons name="search-outline" size={18} color="black" />
-          <TextInput
-            placeholder="Search"
-            placeholderTextColor="#9ca3af"
-            className="ml-2 text-black semibold flex-1 w-full"
-          />
+export default function FutsalsList() {
+  const router = useRouter();
+  const { futsals } = useFutsals();
+
+  // --- Search Logic State ---
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // --- Filtered Data ---
+  const filteredFutsals = useMemo(() => {
+    if (!searchQuery.trim()) return futsals;
+
+    const lowerQuery = searchQuery.toLowerCase();
+    return futsals.filter((futsal) =>
+      futsal.name.toLowerCase().includes(lowerQuery) ||
+      futsal.address.toLowerCase().includes(lowerQuery)
+    );
+  }, [searchQuery, futsals]);
+
+  return (
+    <View className="flex-1 bg-[#205E30]">
+      <SafeAreaView className="flex-none">
+        {/* Top Navigation Bar */}
+        <View className="flex-row justify-between items-center px-4 py-4">
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-xl font-bold">Futsal's List</Text>
+          <TouchableOpacity onPress={() => router.push('/dashboard/futsalsForm')}>
+            <Ionicons name="add" size={32} color="white" />
+          </TouchableOpacity>
         </View>
-      
+      </SafeAreaView>
 
-      {/* Futsals list */}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View className="flex-row px-3 py-3 bg-[#9bb0a5] border-b border-white/5 w-full rounded-lg mb-2">
-            <Text className="flex-1 text-black font-semibold">Name</Text>
-            <Text className="flex-1 text-black font-semibold">Address</Text>
-            <Text className="flex-1 text-black font-semibold">No. of Courts</Text>
-            <Text className="text-black font-semibold ml-2">Action</Text>
+      {/* Main Content Area */}
+      <View className="flex-1 bg-[#F8FAFC] rounded-t-[35px] overflow-hidden">
+        {/* Search Input */}
+        <View className="px-5 pt-8 pb-2">
+          <View className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 h-14 shadow-sm">
+            <Ionicons name="search" size={20} color="#9CA3AF" />
+            <TextInput
+              placeholder="Search futsal by name or address"
+              className="flex-1 ml-3 text-base text-gray-700"
+              placeholderTextColor="#9CA3AF"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              clearButtonMode="while-editing"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
           </View>
-        }
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <View className="h-64 justify-center items-center">
-            <View className="bg-[#9bb0a5] p-4 rounded-full mb-4">
-              <Ionicons name="close" size={24} color="white" />
+        </View>
+
+        <FlatList
+          data={filteredFutsals}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <FutsalCard item={item} router={router} />}
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View className="h-64 justify-center items-center">
+              <View className="bg-gray-100 p-4 rounded-full mb-4">
+                <Ionicons
+                  name={searchQuery ? "search-outline" : "football-outline"}
+                  size={32}
+                  color="#9CA3AF"
+                />
+              </View>
+              <Text className="text-gray-500 text-lg font-medium">
+                {searchQuery ? `No results for "${searchQuery}"` : "No Futsals Found"}
+              </Text>
+              {searchQuery ? (
+                <Text className="text-gray-400 text-sm mt-1">Try a different keyword</Text>
+              ) : null}
             </View>
-            <Text className="text-[#9bb0a5] text-lg">No Futsal Managers</Text>
-          </View>
-        }
-      />
-    </Pressable>
+          }
+        />
+      </View>
+    </View>
   );
 }
-

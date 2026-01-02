@@ -12,6 +12,8 @@ import {
   View
 } from 'react-native';
 import { AuthProvider } from './authContext';
+import { FutsalProvider } from './context/FutsalContext';
+import { ManagerProvider } from './context/ManagerContext';
 import './global.css';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -33,7 +35,11 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <MainContent />
+      <ManagerProvider>
+        <FutsalProvider>
+          <MainContent />
+        </FutsalProvider>
+      </ManagerProvider>
     </AuthProvider>
   );
 }

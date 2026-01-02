@@ -1,146 +1,120 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react';
+import { FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
-import {
-  FlatList,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { useManagers } from '../context/ManagerContext';
 
-interface Manager {
-  id: string;
-  name: string;
-  email: string;
-  futsal: string;
-}
-
-export default function FutsalManagersScreen() {
-  const router = useRouter();
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const data: Manager[] = [
-    { id: '1', name: 'Alex Smith', email: 'alex@example.com', futsal: 'Blue Arena' },
-    { id: '2', name: 'Sam Johnson', email: 'sam@example.com', futsal: 'Red Court' },
-    { id: '3', name: 'Maria Garcia', email: 'maria@example.com', futsal: 'Green Turf' },
-  ];
-
-  const filteredData = useMemo(() => {
-    return data.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
-
-  const renderItem = ({ item }: { item: Manager }) => {
-    const isDropdownVisible = openDropdownId === item.id;
-
-    return (
-      <View 
-        style={{ zIndex: isDropdownVisible ? 100 : 1 }} 
-        className="flex-col px-3 py-3 bg-secondary rounded-xl mb-3 relative"
-      >
-        <View className="flex-row items-center">
-          <View className="flex-[2]">
-             <Text className="text-black font-medium text-[12px]" numberOfLines={1}>{item.name}</Text>
-          </View>
-          <View className="flex-[2]">
-             <Text className="text-gray-500 text-[10px]" numberOfLines={1}>{item.email}</Text>
-          </View>
-          <View className="flex-1 items-end">
-             <Text className="text-black text-[10px] font-semibold" numberOfLines={1}>{item.futsal}</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => setOpenDropdownId(isDropdownVisible ? null : item.id)}
-            className="ml-3 w-6 h-6 items-center justify-center"
-          >
-            <Ionicons name="ellipsis-vertical" size={14} color="black" />
-          </TouchableOpacity>
+const ManagerCard = ({ item }) => (
+  <View className="bg-white mx-4 mt-4 p-4 rounded-3xl border border-gray-100 shadow-sm">
+    {/* Card Header: Name and Badges */}
+    <View className="flex-row justify-between items-start mb-2">
+      <Text className="text-lg font-bold text-gray-800 flex-1">{item.name}</Text>
+      <View className="flex-row space-x-2">
+        <View className="bg-gray-100 px-3 py-1 rounded-full">
+          <Text className="text-gray-500 text-[10px] font-medium">{item.role}</Text>
         </View>
-
-        {isDropdownVisible && (
-          <View 
-            className="absolute top-10 right-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 z-50 overflow-hidden"
-            style={Platform.select({ ios: { shadowOpacity: 0.1, shadowRadius: 10 }, android: { elevation: 5 } })}
-          >
-            <TouchableOpacity 
-              onPress={() => { setOpenDropdownId(null); router.push({ pathname: '/edit/edit', params: { id: item.id } }); }}
-              className="flex-row items-center p-3 border-b border-gray-50"
-            >
-              <Ionicons name="pencil-outline" size={14} color="black" />
-              <Text className="ml-2 text-[11px] text-black">Edit</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => { setOpenDropdownId(null); router.push({ pathname: '/dashboard/futsals', params: { managerId: item.id } }); }}
-              className="flex-row items-center p-3 border-b border-gray-50"
-            >
-              <Ionicons name="football-outline" size={14} color="black" />
-              <Text className="ml-2 text-[11px] text-black">Assign Futsal</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              onPress={() => { setOpenDropdownId(null); router.push({ pathname: '/edit/setting', params: { id: item.id } }); }}
-              className="flex-row items-center p-3"
-            >
-              <Ionicons name="settings-outline" size={14} color="black" />
-              <Text className="ml-2 text-[11px] text-black">Settings</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        <View className="bg-green-50 px-3 py-1 rounded-full">
+          <Text className="text-green-500 text-[10px] font-medium">{item.status}</Text>
+        </View>
       </View>
-    );
-  };
+    </View>
 
-  return (
-    <Pressable className="flex-1 bg-white px-4 pt-4" onPress={() => setOpenDropdownId(null)}>
-      {/* Header */}
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-black text-2xl font-bold tracking-tight">Futsal Managers</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/dashboard/futsalManagerForm')}
-          className="bg-primary px-4 py-2 rounded-full"
-        >
-          <Text className="text-black text-[11px] font-bold">New manager</Text>
+    {/* Location Info */}
+    <View className="mb-4">
+      <View className="flex-row items-center mb-1">
+        <MaterialCommunityIcons name="office-building" size={14} color="#6B7280" />
+        <Text className="text-gray-500 ml-2 text-xs">{item.futsal}</Text>
+      </View>
+      <View className="flex-row items-center">
+        <Ionicons name="location-sharp" size={14} color="#6B7280" />
+        <Text className="text-gray-500 ml-2 text-xs">{item.location}</Text>
+      </View>
+    </View>
+
+    {/* Action Buttons */}
+    <View className="flex-row justify-between items-center">
+      <TouchableOpacity className="bg-[#00D04C] px-6 py-2.5 rounded-xl">
+        <Text className="text-white font-bold text-sm">View Details</Text>
+      </TouchableOpacity>
+
+      <View className="flex-row space-x-3">
+        <TouchableOpacity className="p-1.5 border border-gray-200 rounded-lg">
+          <Ionicons name="create-outline" size={20} color="#4B5563" />
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-[#00D04C] p-2 rounded-lg">
+          <Ionicons name="trash-outline" size={18} color="white" />
         </TouchableOpacity>
       </View>
+    </View>
+  </View>
+);
 
-      {/* Minimal Search */}
-      <View className="flex-row bg-secondary items-center rounded-full px-3 py-2 mb-6 border-hairline">
-        <Ionicons name="search-outline" size={16} color="#6b7280" />
-        <TextInput
-          placeholder="Search"
-          placeholderTextColor="#9ca3af"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          className="ml-2 text-black flex-1 text-[12px]"
+export default function ManagersList() {
+  const router = useRouter();
+  const { managers } = useManagers();
+
+  return (
+    <View className="flex-1 bg-[#205E30]">
+      <SafeAreaView className="flex-none">
+        {/* Top Navigation Bar */}
+        <View className="flex-row justify-between items-center px-4 py-4">
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-xl font-bold">Manager's List</Text>
+          <TouchableOpacity onPress={() => router.push('/dashboard/futsalManagerForm')}>
+            <Ionicons name="add" size={32} color="white" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
+      {/* Main Content Area */}
+      <View className="flex-1 bg-[#F8FAFC] rounded-t-[35px] overflow-hidden">
+        {/* Search Input */}
+        <View className="px-5 pt-8 pb-2">
+          <View className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 h-14 shadow-sm">
+            <Ionicons name="search" size={20} color="#9CA3AF" />
+            <TextInput
+              placeholder="Search manager"
+              className="flex-1 ml-3 text-base text-gray-700"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+        </View>
+
+        <FlatList
+          data={managers}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <ManagerCard item={item} />}
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
         />
-      </View>
 
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View className="flex-row px-3 mb-2 bg-[#9bb0a5] rounded-lg py-3">
-            <Text className="flex-[2] text-black font-semibold text-[9px] ">Name</Text>
-            <Text className="flex-[2] text-black font-semibold text-[9px] ">Email</Text>
-            <Text className="flex-1 text-black font-semibold text-right text-[9px] ">Arena</Text>
-            <View className="w-9" /> 
-          </View>
-        }
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <View className="mt-20 items-center">
-            <Text className="text-black text-[12px]">No managers found</Text>
-          </View>
-        }
-      />
-    </Pressable>
+        {/* Floating Bottom Tab Bar
+        <View className="absolute bottom-0 w-full bg-white flex-row justify-around pt-3 pb-8 border-t border-gray-100">
+          <TouchableOpacity className="items-center">
+            <Ionicons name="basketball" size={24} color="#000" />
+            <Text className="text-[11px] mt-1 text-gray-900">Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="items-center">
+            <Ionicons name="person" size={24} color="#00D04C" />
+            <Text className="text-[11px] mt-1 text-[#00D04C] font-bold">Managers</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="items-center">
+            <MaterialCommunityIcons name="soccer-field" size={24} color="#000" />
+            <Text className="text-[11px] mt-1 text-gray-900">Futsals</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="items-center">
+            <Ionicons name="ellipsis-vertical" size={24} color="#000" />
+            <Text className="text-[11px] mt-1 text-gray-900">More</Text>
+          </TouchableOpacity>
+        </View>
+      </View> */}
+      </View>
+    </View>
   );
 }
